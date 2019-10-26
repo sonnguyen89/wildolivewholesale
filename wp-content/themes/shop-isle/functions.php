@@ -51,3 +51,17 @@ function woo_login_redirect() {
     }
 }
 add_action('template_redirect', 'woo_login_redirect');
+
+/**
+ * CUSTOMISE THE THEME
+ */
+
+
+function register_my_menus() {
+    register_nav_menus(
+        array(
+            'secondary-primary-menu' => __( 'Secondary Primary Menu' ),
+        )
+    );
+}
+add_action( 'init', 'register_my_menus' );

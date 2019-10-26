@@ -41,112 +41,115 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
 		}
 
 		if ( $shop_isle_front_page_case ) {
-			$navbar_class .= ' navbar-color-on-scroll navbar-transparent ';
+			//$navbar_class .= ' navbar-color-on-scroll navbar-transparent ';
+            $navbar_class .= ' navbar-color-on-scroll';
 		}
 
 		?>
 		<!-- Navigation start -->
 		<nav class="navbar navbar-custom navbar-fixed-top <?php echo esc_attr( $navbar_class ); ?>" role="navigation">
+            <div class="container">
+                <div class="header-container">
+                    <div class="navbar-header">
+                        <div type="button" class="navbar-toggle" data-toggle="collapse" data-target="#custom-collapse">
+                            <span class="sr-only"><?php _e( 'Toggle navigation', 'shop-isle' ); ?></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </div>
+                    </div>
 
-		<div class="container">
-		<div class="header-container">
+                    <div class="header-menu-wrap">
+                        <div class="collapse navbar-collapse left-menu-bar" id="custom-collapse" style="float:left;margin-top: 10px;">
+                            <?php
+                            wp_nav_menu(
+                                array(
+                                    'theme_location' => 'primary',
+                                    'container'      => false,
+                                    'menu_class'     => 'nav navbar-nav navbar-left',
+                                )
+                            );
+                            ?>
+                        </div>
+                        <!-- the logo section  --->
+                        <?php
+                        echo '<div class="shop_isle_header_title"><div class="shop-isle-header-title-inner">';
+                        // Logo selected
+                        if ( has_custom_logo() ) {
 
-		<div class="navbar-header">
-		<?php
+                            if ( function_exists( 'the_custom_logo' ) ) {
+                                the_custom_logo();
+                            }
 
-		echo '<div class="shop_isle_header_title"><div class="shop-isle-header-title-inner">';
+                            if ( is_customize_preview() ) {
+                                // Front page
+                                if ( is_front_page() ) {
+                                    echo '<h1 class="site-title shop_isle_hidden_if_not_customizer"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></h1>';
+                                    // Other page
+                                } else {
+                                    echo '<p class="site-title shop_isle_hidden_if_not_customizer"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></p>';
+                                }
+                            }
 
-		// Logo selected
-		if ( has_custom_logo() ) {
+                            // Without logo
+                        } else {
+                            if ( is_customize_preview() ) {
+                                echo ' <a href="' . esc_url( home_url( '/' ) ) . '" class="logo-image shop_isle_hidden_if_not_customizer"><img src=""></a>';
+                            }
 
-			if ( function_exists( 'the_custom_logo' ) ) {
-				the_custom_logo();
-			}
+                            // Front page
+                            if ( is_front_page() ) {
+                                echo '<h1 class="site-title"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></h1>';
+                                // Other page
+                            } else {
+                                echo '<p class="site-title"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></p>';
+                            }
 
-			if ( is_customize_preview() ) {
-				// Front page
-				if ( is_front_page() ) {
-					echo '<h1 class="site-title shop_isle_hidden_if_not_customizer"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></h1>';
-					// Other page
-				} else {
-					echo '<p class="site-title shop_isle_hidden_if_not_customizer"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></p>';
-				}
-			}
+                           // echo '<p class="site-description"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'description', 'display' ) ) . '" rel="home">' . get_bloginfo( 'description' ) . '</a></p>';
+                        }
+                          echo '</div></div>';
+                        ?>
 
-			// Without logo
-		} else {
-			if ( is_customize_preview() ) {
-				echo ' <a href="' . esc_url( home_url( '/' ) ) . '" class="logo-image shop_isle_hidden_if_not_customizer"><img src=""></a>';
-			}
 
-			// Front page
-			if ( is_front_page() ) {
-				echo '<h1 class="site-title"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></h1>';
-				// Other page
-			} else {
-				echo '<p class="site-title"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" rel="home">' . get_bloginfo( 'name' ) . '</a></p>';
-			}
+                        <div class="collapse navbar-collapse right-menu-bar" id="custom-collapse" style="float:right;margin-top: 10px;">
+                            <?php
+                            wp_nav_menu(
+                                array(
+                                    'theme_location' => 'secondary-primary-menu',
+                                    'container'      => false,
+                                    'menu_class'     => 'nav navbar-nav navbar-right',
+                                )
+                            );
+                            ?>
+                        </div>
+                    </div>
+                    <?php if ( class_exists( 'WooCommerce', false ) ) : ?>
+                    <div class="navbar-cart">
 
-			echo '<p class="site-description"><a href="' . esc_url( home_url( '/' ) ) . '" title="' . esc_attr( get_bloginfo( 'description', 'display' ) ) . '" rel="home">' . get_bloginfo( 'description' ) . '</a></p>';
-		}
-		echo '</div></div>';
-		?>
+                      <!--  <div class="header-search">
+                            <div class="glyphicon glyphicon-search header-search-button"></div>
+                            <div class="header-search-input">
+                                <form role="search" method="get" class="woocommerce-product-search" action="<?php /*echo esc_url( home_url( '/' ) ); */?>">
+                                    <input type="search" class="search-field" placeholder="<?php /*echo esc_attr_x( 'Search Products&hellip;', 'placeholder', 'shop-isle' ); */?>" value="<?php /*echo get_search_query(); */?>" name="s" title="<?php /*echo esc_attr_x( 'Search for:', 'label', 'shop-isle' ); */?>" />
+                                    <input type="submit" value="<?php /*echo esc_attr_x( 'Search', 'submit button', 'shop-isle' ); */?>" />
+                                    <input type="hidden" name="post_type" value="product" />
+                                </form>
+                            </div>
+                        </div>-->
 
-						<div type="button" class="navbar-toggle" data-toggle="collapse" data-target="#custom-collapse">
-							<span class="sr-only"><?php _e( 'Toggle navigation', 'shop-isle' ); ?></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-						</div>
-					</div>
-
-					<div class="header-menu-wrap">
-						<div class="collapse navbar-collapse" id="custom-collapse">
-
-							<?php
-
-							wp_nav_menu(
-								array(
-									'theme_location' => 'primary',
-									'container'      => false,
-									'menu_class'     => 'nav navbar-nav navbar-right',
-								)
-							);
-							?>
-
-						</div>
-					</div>
-
-					<?php if ( class_exists( 'WooCommerce', false ) ) : ?>
-						<div class="navbar-cart">
-
-							<div class="header-search">
-								<div class="glyphicon glyphicon-search header-search-button"></div>
-								<div class="header-search-input">
-									<form role="search" method="get" class="woocommerce-product-search" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-										<input type="search" class="search-field" placeholder="<?php echo esc_attr_x( 'Search Products&hellip;', 'placeholder', 'shop-isle' ); ?>" value="<?php echo get_search_query(); ?>" name="s" title="<?php echo esc_attr_x( 'Search for:', 'label', 'shop-isle' ); ?>" />
-										<input type="submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'shop-isle' ); ?>" />
-										<input type="hidden" name="post_type" value="product" />
-									</form>
-								</div>
-							</div>
-
-							<?php if ( function_exists( 'WC' ) ) : ?>
-								<div class="navbar-cart-inner">
-									<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" title="<?php esc_attr_e( 'View your shopping cart', 'shop-isle' ); ?>" class="cart-contents">
-										<span class="icon-basket"></span>
-										<span class="cart-item-number"><?php echo esc_html( trim( WC()->cart->get_cart_contents_count() ) ); ?></span>
-									</a>
-									<?php apply_filters( 'shop_isle_cart_icon', '' ); ?>
-								</div>
-							<?php endif; ?>
-
-						</div>
-					<?php endif; ?>
-
-				</div>
-			</div>
-
+                        <?php if ( function_exists( 'WC' ) ) : ?>
+                            <div class="navbar-cart-inner">
+                                <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" title="<?php esc_attr_e( 'View your shopping cart', 'shop-isle' ); ?>" class="cart-contents">
+                                    <span class="icon-basket"></span>
+                                    <span class="cart-item-number"><?php echo esc_html( trim( WC()->cart->get_cart_contents_count() ) ); ?></span>
+                                </a>
+                                <?php apply_filters( 'shop_isle_cart_icon', '' ); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 		</nav>
 		<!-- Navigation end -->
 		<?php
