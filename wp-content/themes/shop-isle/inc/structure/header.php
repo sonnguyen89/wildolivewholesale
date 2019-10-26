@@ -48,7 +48,7 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
 		?>
 		<!-- Navigation start -->
 		<nav class="navbar navbar-custom navbar-fixed-top <?php echo esc_attr( $navbar_class ); ?>" role="navigation">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="header-container">
                     <div class="navbar-header">
                         <div type="button" class="navbar-toggle" data-toggle="collapse" data-target="#custom-collapse">
