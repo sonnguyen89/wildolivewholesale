@@ -867,7 +867,7 @@ function shop_isle_pro_function_for_mega_menu() {
 
 	/* wr mega menu */
 	echo '<style id="shop_isle_footer_css" type="text/css">';
-	echo '
+	/*echo '
 		.wr-megamenu-container.bg-tr {
 			background: transparent !important;
 		}
@@ -876,13 +876,22 @@ function shop_isle_pro_function_for_mega_menu() {
 		    ' . $bg_dropdown . ' !important;
 		    color: #fff !important;
 		}
-		
+
 		@media (max-width: 768px) {
 			.navbar-fixed-top .navbar-collapse {
 				' . $bg_dropdown . ' !important;
 			}
 		}
-	';
+	';*/
+    echo '
+		.wr-megamenu-container.bg-tr {
+			background: transparent !important;
+		}
+		.wr-megamenu-container ul.wr-mega-menu ul.sub-menu,
+		.wr-megamenu-inner {
+		    ' . $bg_dropdown . ' !important;
+		    color: #fff !important;
+		}';
 
 	echo '</style>';
 

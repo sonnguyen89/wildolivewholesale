@@ -60,7 +60,7 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
                     </div>
 
                     <div class="header-menu-wrap">
-                        <div class="collapse navbar-collapse left-menu-bar" id="custom-collapse" style="float:left;margin-top: 10px;">
+                        <div class="collapse navbar-collapse left-menu-bar" id="custom-collapse">
                             <?php
                             wp_nav_menu(
                                 array(
@@ -111,7 +111,7 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
                         ?>
 
 
-                        <div class="collapse navbar-collapse right-menu-bar" id="custom-collapse" style="float:right;margin-top: 10px;">
+                        <div class="collapse navbar-collapse right-menu-bar" id="right-custom-collapse">
                             <?php
                             wp_nav_menu(
                                 array(
