@@ -347,7 +347,7 @@ function shop_isle_scripts() {
 
 	wp_enqueue_script( 'owl-carousel-js', get_template_directory_uri() . '/assets/js/vendor/owl.carousel.min.js', array( 'jquery' ), '2.1.8', true );
 
-	wp_enqueue_script(
+	/*wp_enqueue_script(
 		'shop-isle-custom',
 		get_template_directory_uri() . '/assets/js/custom.min.js',
 		array(
@@ -357,7 +357,18 @@ function shop_isle_scripts() {
 		),
 		'20180411',
 		true
-	);
+	);*/
+    wp_enqueue_script(
+        'shop-isle-custom',
+        get_template_directory_uri() . '/assets/js/custom.js',
+        array(
+            'jquery',
+            'flexslider',
+            'jquery-mb-YTPlayer',
+        ),
+        '20180411',
+        true
+    );
 
 	wp_enqueue_script( 'shop-isle-navigation', get_template_directory_uri() . '/js/navigation.min.js', array(), '20120208', true );
 

@@ -63,7 +63,7 @@
 			}
 
 			buildHomeSection( homeSection );
-			navbarAnimation( navbar, homeSection, navHeight );
+			//navbarAnimation( navbar, homeSection, navHeight );
 			hoverDropdown( width, mobileTest );
 
 			$( window ).resize(
@@ -77,7 +77,7 @@
 			$( window ).scroll(
 				function() {
 					effectsHomeSection( homeSection, this );
-					navbarAnimation( navbar, homeSection, navHeight );
+					//navbarAnimation( navbar, homeSection, navHeight );
 				}
 			);
 

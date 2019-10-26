@@ -6,8 +6,10 @@ CUSTOMIZE THE THEME
     float: none;
     width: 0;
 }
-
-body.home .navbar-custom {
+.page .navbar-custom{
+    background-color: #f4f0ea !important;
+}
+.navbar-custom {
     background: #f4f0ea !important;
     color: rgba(0,0,0,.73);
     font-size: 11px;
@@ -73,17 +75,17 @@ body.home .navbar-custom {
 }
 .navbar-cart .navbar-cart-inner .cart-item-number {
     position: absolute;
-    top: 24px;
+    top: 22px;
     right: initial;
-    left: 13px;
-    min-width: 16px;
-    border-radius: 3px;
-    background: #faf8f6;
-
+    left: 16px;
+    border-radius: 8px;
+    background: #42413f;
+    color: #fff;
+    height: 13px;
+    min-width: 11px;
 }
-.add_to_cart_button:not(.product_type_variable):before,
-.icon-basket:before,
-.single-product div.product form.cart .button:before {
+.navbar-cart-inner .add_to_cart_button:not(.product_type_variable):before,
+.navbar-cart-inner .icon-basket:before {
     top: 12px !important;
 }
 

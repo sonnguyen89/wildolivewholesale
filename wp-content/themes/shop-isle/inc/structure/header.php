@@ -42,7 +42,7 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
 
 		if ( $shop_isle_front_page_case ) {
 			//$navbar_class .= ' navbar-color-on-scroll navbar-transparent ';
-            $navbar_class .= ' navbar-color-on-scroll';
+            $navbar_class .= '';
 		}
 
 		?>
