@@ -15,12 +15,13 @@ CUSTOMIZE THE THEME
     font-size: 11px;
     letter-spacing: 1px;
     font-weight: 500;
+    padding: 20px 0;
 }
 .header-menu-wrap .left-menu-bar {
     float:left;width: 15%;
 }
 .header-menu-wrap .right-menu-bar {
-    float:right;width: 25%;
+    float:right;width: 20%;
 
 }
 .header-menu-wrap .left-menu-bar,
@@ -32,7 +33,7 @@ CUSTOMIZE THE THEME
 .shop_isle_header_title h1 a {
     display: block;
     color: rgba(0,0,0,.73);
-    font-size: 22px;
+    font-size: 30px;
     font-weight: bold;
     line-height: 24px;
     letter-spacing: 4px;
@@ -60,7 +61,7 @@ CUSTOMIZE THE THEME
 .shop_isle_header_title {
     text-align: center;
     margin: 0 auto;
-    width: 60%;
+    width: 65%;
 }
 .shop-isle-header-title-inner {
     text-align: center;
