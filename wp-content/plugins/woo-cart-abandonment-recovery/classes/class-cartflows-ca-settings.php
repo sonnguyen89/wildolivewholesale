@@ -84,7 +84,45 @@ class Cartflows_Ca_Settings {
 			'wcf_ca_ignore_users'
 		);
 
-		// End: Settings for cart abandonment.
+		// End: General Settings for cart abandonment.
+		// Start: Delete coupons settings for cart abandonment.
+
+		add_settings_section(
+			WCF_CA_COUPONS_SETTINGS_SECTION,
+			__( 'Coupons Settings', 'woo-cart-abandonment-recovery' ),
+			array( $this, 'wcf_cart_abandonment_options_callback' ),
+			WCF_CA_PAGE_NAME
+		);
+
+		add_settings_field(
+			'wcf_ca_auto_delete_coupons',
+			__( 'Delete Coupons Automatically', 'woo-cart-abandonment-recovery' ),
+			array( $this, 'wcf_ca_auto_delete_coupons_callback' ),
+			WCF_CA_PAGE_NAME,
+			WCF_CA_COUPONS_SETTINGS_SECTION,
+			array( __( 'Delete coupons automatically on weekly basis.<br><span class="description"><br/><strong>Note:</strong> This option will set a weekly cron to delete all <strong>expired</strong> and <strong>used</strong> coupons automatically in the background.</p>', 'woo-cart-abandonment-recovery' ) )
+		);
+
+		register_setting(
+			WCF_CA_SETTINGS_OPTION_GROUP,
+			'wcf_ca_auto_delete_coupons'
+		);
+
+		add_settings_field(
+			'wcf_ca_delete_coupons',
+			__( 'Delete Coupons Manually', 'woo-cart-abandonment-recovery' ),
+			array( $this, 'wcf_ca_delete_coupons_callback' ),
+			WCF_CA_PAGE_NAME,
+			WCF_CA_COUPONS_SETTINGS_SECTION,
+			array( '<br><span class="description"> ' . __( '<br><strong>Note:</strong> This will delete all <strong>expired</strong> and <strong>used</strong> coupons that were created by Woo Cart Abandonment Recovery.</p>', 'woo-cart-abandonment-recovery' ) )
+		);
+
+		register_setting(
+			WCF_CA_SETTINGS_OPTION_GROUP,
+			'wcf_ca_delete_coupons'
+		);
+
+		// End: Delete coupons settings for cart abandonment.
 		// Start: Settings for email templates.
 		add_settings_section(
 			WCF_CA_EMAIL_SETTINGS_SECTION,
@@ -99,7 +137,7 @@ class Cartflows_Ca_Settings {
 			array( $this, 'wcf_ca_from_name_callback' ),
 			WCF_CA_PAGE_NAME,
 			WCF_CA_EMAIL_SETTINGS_SECTION,
-			array( 'Name will appear in email sent.', 'woo-cart-abandonment-recovery' )
+			array( __( 'Name will appear in email sent.', 'woo-cart-abandonment-recovery' ) )
 		);
 
 		add_settings_field(
@@ -108,7 +146,7 @@ class Cartflows_Ca_Settings {
 			array( $this, 'wcf_ca_from_email_callback' ),
 			WCF_CA_PAGE_NAME,
 			WCF_CA_EMAIL_SETTINGS_SECTION,
-			array( 'Email which send from.', 'woo-cart-abandonment-recovery' )
+			array( __( 'Email which send from.', 'woo-cart-abandonment-recovery' ) )
 		);
 
 		add_settings_field(
@@ -117,7 +155,7 @@ class Cartflows_Ca_Settings {
 			array( $this, 'wcf_ca_reply_email_callback' ),
 			WCF_CA_PAGE_NAME,
 			WCF_CA_EMAIL_SETTINGS_SECTION,
-			array( 'When a user clicks reply, which email address should that reply be sent to?', 'woo-cart-abandonment-recovery' )
+			array( __( 'When a user clicks reply, which email address should that reply be sent to?', 'woo-cart-abandonment-recovery' ) )
 		);
 
 		register_setting(
@@ -206,7 +244,7 @@ class Cartflows_Ca_Settings {
 			array( $this, 'wcf_ca_coupon_expiry_callback' ),
 			WCF_CA_PAGE_NAME,
 			WCF_CA_ZAPIER_SETTINGS_SECTION,
-			array( '<br/><br/> <span class="description"><strong>Note: </strong> Enter zero (0) to restrict coupon from expiring.</span>', 'woo-cart-abandonment-recovery' )
+			array( __( '<br/><br/> <span class="description"><strong>Note: </strong>. Enter zero (0) to restrict coupon from expiring.</span>', 'woo-cart-abandonment-recovery' ) )
 		);
 
 		register_setting(
@@ -364,8 +402,8 @@ class Cartflows_Ca_Settings {
 
 		$coupon_expiry_unit = get_option( 'wcf_ca_coupon_expiry_unit' );
 		$items              = array(
-			'hours' => 'Hour(s)',
-			'days'  => 'Day(s)',
+			'hours' => __( 'Hour(s)', 'woo-cart-abandonment-recovery' ),
+			'days'  => __( 'Day(s)', 'woo-cart-abandonment-recovery' ),
 		);
 		echo "<select id='wcf_ca_coupon_expiry_unit' name='wcf_ca_coupon_expiry_unit'>";
 		foreach ( $items as $key => $item ) {
@@ -501,6 +539,39 @@ class Cartflows_Ca_Settings {
 		</p>
 		<?php
 		$html .= '<span for="wcf_ca_ignore_users"> ' . $args[0] . '</span>';
+		echo $html;
+	}
+
+	/**
+	 * Delete coupons.
+	 *
+	 * @param array $args args.
+	 */
+	function wcf_ca_auto_delete_coupons_callback( $args ) {
+		$wcf_ca_auto_delete_coupons = get_option( 'wcf_ca_auto_delete_coupons' );
+		$html                       = '';
+		printf(
+			'<input type="checkbox" id="wcf_ca_auto_delete_coupons" name="wcf_ca_auto_delete_coupons" value="on"
+  		 	' . checked( 'on', $wcf_ca_auto_delete_coupons, false ) . ' />'
+		);
+		$html .= '<span for="wcf_ca_auto_delete_coupons"> ' . $args[0] . '</span>';
+		echo $html;
+	}
+
+	/**
+	 * Delete coupons.
+	 *
+	 * @param array $args args.
+	 */
+	function wcf_ca_delete_coupons_callback( $args ) {
+		?>
+
+		<input type="button" class="button-secondary" id="wcf_ca_delete_coupons" value="<?php esc_html_e( 'Delete', 'woo-cart-abandonment-recovery' ); ?>" >
+		<span class="spinner wcf-ca-spinner"></span>
+		<span class="wcf-ca-response-msg"></span>
+		<?php
+		$html  = '';
+		$html .= '<span for="wcf_ca_delete_coupons"> ' . $args[0] . '</span>';
 		echo $html;
 	}
 

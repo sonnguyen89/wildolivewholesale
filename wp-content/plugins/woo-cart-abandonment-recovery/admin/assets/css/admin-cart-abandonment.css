@@ -1,4 +1,3 @@
-
 .wcf-ca-ibox {
     clear: both;
     margin-bottom: 25px;
@@ -400,3 +399,15 @@
 .wcf-sub-heading {
     font-weight: 400;
 }
+
+.wcf-ca-spinner{
+    float:unset;
+}
+
+.wcf-ca-response-msg{
+    vertical-align: sub;
+    line-height: 28px;
+    margin-left: 10px;
+    font-weight: bold;
+}
+

@@ -120,7 +120,7 @@ class Cartflows_Checkout_Markup {
 			return;
 		}
 
-		if ( _is_wcf_checkout_type() || _is_wcf_checkout_shortcode() || _is_wcf_thankyou_type() ) {
+		if ( _is_wcf_checkout_type() || _is_wcf_thankyou_type() ) {
 			return;
 		}
 
@@ -134,11 +134,11 @@ class Cartflows_Checkout_Markup {
 
 		if (
 			// ignore on order-pay.
-			false === mb_strpos( $_SERVER['REQUEST_URI'], '/' . $order_pay_endpoint . '/' ) &&
+			false === wcf_mb_strpos( $_SERVER['REQUEST_URI'], '/' . $order_pay_endpoint . '/' ) &&
 			// ignore on TY page.
-			false === mb_strpos( $_SERVER['REQUEST_URI'], '/' . $order_received_endpoint . '/' ) &&
+			false === wcf_mb_strpos( $_SERVER['REQUEST_URI'], '/' . $order_received_endpoint . '/' ) &&
 			// ignore if order-pay in query param.
-			false === mb_strpos( $_SERVER['REQUEST_URI'], $order_pay_endpoint . '=' )
+			false === wcf_mb_strpos( $_SERVER['REQUEST_URI'], $order_pay_endpoint . '=' )
 		) {
 
 			if ( '' !== $global_checkout ) {
@@ -391,8 +391,8 @@ class Cartflows_Checkout_Markup {
 								$cart_product_count++;
 							}
 						} else {
-
-							echo '<p>' . __( 'This product can\'t be purcahsed', 'cartflows' ) . '</p>';
+							$wrong_product_notice = __( 'This product can\'t be purchased', 'cartflows' );
+							wc_add_notice( $wrong_product_notice );
 							// WC()->cart->add_to_cart( $product_id, $quantity );.
 						}
 					}
@@ -988,13 +988,14 @@ class Cartflows_Checkout_Markup {
 		$coupon_field = array(
 			'field_text'  => __( 'Coupon Code', 'cartflows' ),
 			'button_text' => __( 'Apply', 'cartflows' ),
+			'class'       => '',
 		);
 
-		$coupon_field = apply_filters( 'cartflows_coupon_field_text', $coupon_field );
+		$coupon_field = apply_filters( 'cartflows_coupon_field_options', $coupon_field );
 
 		ob_start();
 		?>
-		<div class="wcf-custom-coupon-field">
+		<div class="wcf-custom-coupon-field <?php echo $coupon_field['class']; ?>" id="wcf_custom_coupon_field">
 				<div class="wcf-coupon-col-1">
 					<span>
 						<input type="text" name="coupon_code" class="input-text wcf-coupon-code-input" placeholder="<?php echo $coupon_field['field_text']; ?>" id="coupon_code" value="">

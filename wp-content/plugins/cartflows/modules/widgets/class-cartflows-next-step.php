@@ -18,7 +18,6 @@ class Cartflows_Next_Step extends WP_Widget {
 	function __construct() {
 
 		parent::__construct(
-
 			// Base ID of your widget.
 			'cartflows_next_step',
 			// Widget name will appear in UI.

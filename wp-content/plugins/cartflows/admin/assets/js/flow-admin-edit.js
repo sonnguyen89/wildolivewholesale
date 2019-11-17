@@ -85,6 +85,11 @@
 						parent.slideUp(400, 'swing', function() {
 							parent.remove();
 						});
+
+						setTimeout(function() {
+						    $('.wcf-flow-steps-container').trigger('wcf-step-deleted',[step_id]);
+						}, 600);
+
 						console.log( data );
 					}
 				});

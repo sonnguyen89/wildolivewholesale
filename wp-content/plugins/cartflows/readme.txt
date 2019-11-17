@@ -1,10 +1,10 @@
-=== Funnel Builder by CartFlows - Create High Converting Sales Funnels For WordPress ===
+﻿=== Funnel Builder by CartFlows - Create High Converting Sales Funnels For WordPress ===
 Contributors: brainstormforce, wpcrafter
 Donate link: https://www.paypal.me/BrainstormForce
 Tags: woocommerce, funnel builder, sales funnels, elementor, beaver builder
 Requires at least: 4.4
-Tested up to: 5.2.2
-Stable tag: 1.2.6
+Tested up to: 5.2.4
+Stable tag: 1.3.1
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -124,6 +124,15 @@ Glad you asked! CartFlows Pro is an optional add-on to CartFlows that adds addit
 5. Easily edit anything with your page builder.
 
 == Changelog ==
+= Version 1.3.1 - Wednesday, 6th November 2019 =
+* Improvement: Added compatibility for a future release of CartFlows Pro.
+* Fix: Security issue fix & added user capability check.
+
+= Version 1.3.0 - Tuesday, 15th October 2019 =
+* New: Native Facebook pixel support added.
+* Fix: Fallback added for mb_strpos function fatal error for older PHP versions.
+* Fix: DIVI two step unused CSS removed.
+
 = Version 1.2.6 - Tuesday, 27th August 2019 =
 * New: 'wp_body_open' action support added in templates.
 * Improvement: Added compatibility for a future release of CartFlows Pro.

@@ -544,6 +544,7 @@ class Cartflows_Admin {
 		self::save_common_settings();
 		self::save_debug_settings();
 		self::save_permalink_settings();
+		self::save_facebook_settings();
 
 		// Let extensions hook into saving.
 		do_action( 'cartflows_admin_settings_save' );
@@ -587,6 +588,33 @@ class Cartflows_Admin {
 
 		return $classes;
 	}
+
+	/**
+	 * Save Global Setting options.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function save_facebook_settings() {
+
+		if ( isset( $_POST['cartflows-facebook-settings-nonce'] ) && wp_verify_nonce( $_POST['cartflows-facebook-settings-nonce'], 'cartflows-facebook-settings' ) ) {
+
+			$url          = $_SERVER['REQUEST_URI'];
+			$new_settings = array();
+
+			if ( isset( $_POST['_cartflows_facebook'] ) ) {
+				$new_settings = self::sanitize_form_inputs( $_POST['_cartflows_facebook'] );
+			}
+
+			Cartflows_Helper::update_admin_settings_option( '_cartflows_facebook', $new_settings, false );
+			$query       = array(
+				'message' => 'saved',
+			);
+			$redirect_to = add_query_arg( $query, $url );
+			wp_redirect( $redirect_to );
+			exit;
+		}
+	}
+
 }
 
 Cartflows_Admin::init();

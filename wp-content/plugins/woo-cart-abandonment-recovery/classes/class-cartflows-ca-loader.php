@@ -66,6 +66,7 @@ if ( ! class_exists( 'CARTFLOWS_CA_Loader' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'load_plugin' ), 99 );
 
 			add_action( 'plugins_loaded', array( $this, 'load_cf_textdomain' ) );
+
 		}
 
 		/**
@@ -77,7 +78,7 @@ if ( ! class_exists( 'CARTFLOWS_CA_Loader' ) ) {
 			define( 'CARTFLOWS_CA_BASE', plugin_basename( CARTFLOWS_CA_FILE ) );
 			define( 'CARTFLOWS_CA_DIR', plugin_dir_path( CARTFLOWS_CA_FILE ) );
 			define( 'CARTFLOWS_CA_URL', plugins_url( '/', CARTFLOWS_CA_FILE ) );
-			define( 'CARTFLOWS_CA_VER', '1.1.9' );
+			define( 'CARTFLOWS_CA_VER', '1.2.2' );
 			define( 'CARTFLOWS_CA_SLUG', 'cartflows_ca' );
 
 			define( 'CARTFLOWS_CA_CART_ABANDONMENT_TABLE', 'cartflows_ca_cart_abandonment' );
@@ -328,7 +329,6 @@ if ( ! class_exists( 'CARTFLOWS_CA_Loader' ) ) {
 		function deactivation_reset() {
 			wp_clear_scheduled_hook( 'cartflows_ca_update_order_status_action' );
 		}
-
 	}
 
 	/**

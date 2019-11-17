@@ -83,14 +83,18 @@
          
         }
     }
+        
 
     EmailTemplatesAdmin = {
+
 
         init: function () {
 
             $(document).on('click', '#wcf_preview_email', EmailTemplatesAdmin.send_test_email);
             $(document).on('click', '.wcf-ca-switch.wcf-toggle-template-status', EmailTemplatesAdmin.toggle_activate_template);
+            $(document).on('click', '#wcf_ca_delete_coupons', EmailTemplatesAdmin.delete_coupons);
 
+            $(document).on('click', '.wcar-switch-grid', EmailTemplatesAdmin.toggle_activate_template_on_grid);
             var coupon_child_fields = "#wcf_email_discount_type, #wcf_email_discount_amount, #wcf_email_coupon_expiry_date, #wcf_free_shipping_coupon, #wcf_auto_coupon_apply, #wcf_individual_use_only";
             $(coupon_child_fields).closest('tr').toggle($("#wcf_override_global_coupon").is(":checked"));
             $(document).on('click', '#wcf_override_global_coupon', function () {
@@ -153,17 +157,68 @@
             $(".wcf-ca-error-msg").delay(2000).fadeOut();
         },
 
-        toggle_activate_template: function () {
+        delete_coupons: function () {
+                var msg = wcf_ca_delete_coupons._confirm_msg;
+                var show_msg = confirm(msg);
+                if (show_msg == true) {
+                    var nonce = wcf_ca_delete_coupons._delete_coupon_nonce
+                    var data = {
+                        action: 'wcf_ca_delete_garbage_coupons',
+                        security: nonce
+                    };
+                    $('.wcf-ca-spinner').show();
 
+                    $('.wcf-ca-spinner').addClass("is-active");
+                    $("#wcf_ca_delete_coupons").css('cursor', 'wait').attr("disabled", true);
+                     $.post(
+                        ajaxurl, data, function (response) {
+                            $(".wcf-ca-response-msg").empty().fadeIn();;
+                             if (response.success) {
+                                $('.wcf-ca-spinner').hide();
+                                $(".wcf-ca-response-msg").css('color','green').html(response.data).delay(5000).fadeOut();
+                            }
+
+                            $("#wcf_ca_delete_coupons").css('cursor', '').attr("disabled", false);
+                        }
+                    );
+                }
+        },
+
+
+        toggle_activate_template_on_grid: function () {
+            var $switch, state, new_state;
+            $switch = $(this);
+            state = $switch.attr('wcf-ca-template-switch');
+            var css = (state === 'on') ? 'green' : 'red';
+            var nonce = wcf_ca_details.email_toggle_button_nonce;
+
+            $.post(
+                ajaxurl, {
+                    action: 'activate_email_templates',
+                    id: $(this).attr('id'),
+                    state: state,
+                    security: nonce
+                }, function (response) {
+
+                    $("#wcf_activate_email_template").val(new_state == 'on' ? 1 : 0);
+
+                    $(".wcar_tmpl_response_msg").remove();
+
+                    $("<span class='wcar_tmpl_response_msg'> " + response.data + " </span>").insertAfter($switch).delay(2000).fadeOut().css('color', css);
+
+                }
+            );
+        },
+
+
+        toggle_activate_template: function () {
             var $switch, state, new_state;
             $switch = $(this);
             state = $switch.attr('wcf-ca-template-switch');
             new_state = state === 'on' ? 'off' : 'on';
-
             $("#wcf_activate_email_template").val(new_state == 'on' ? 1 : 0);
             $switch.attr('wcf-ca-template-switch', new_state);
         }
-
     }
 	
 	ZapierSettings = {
@@ -189,14 +244,14 @@
 			datetime += ' '+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();
 			if ($.trim(zapier_webhook_url) !== "") {
 				var sample_data = {
-					"first_name": CartFlowsCADetails.name,
-					"last_name": CartFlowsCADetails.surname,
-					"email": CartFlowsCADetails.email,
+					"first_name": wcf_ca_details.name,
+					"last_name": wcf_ca_details.surname,
+					"email": wcf_ca_details.email,
 					"order_status": event.data.order_status,
 					"checkout_url": window.location.origin + "/checkout/?wcf_ac_token=something",
 					"coupon_code": "abcgefgh",
                     "product_names": "Product1, Product2 & Product3",
-                    "cart_total": CartFlowsCADetails.woo_currency_symbol + "20"
+                    "cart_total": wcf_ca_details.woo_currency_symbol + "20"
 				};
 				$.ajax({
 					url: zapier_webhook_url,

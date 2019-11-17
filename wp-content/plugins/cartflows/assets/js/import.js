@@ -288,7 +288,8 @@ var CartFlowsAjaxQueue = (function() {
 							type: 'POST',
 							data: {
 								action      : 'cartflows_activate_plugin',
-								plugin_init : plugin.init
+								plugin_init : plugin.init,
+								security    : CartFlowsImportVars.cartflows_activate_plugin_nonce
 							},
 							success: function( result ) {
 
@@ -329,7 +330,8 @@ var CartFlowsAjaxQueue = (function() {
 						type : 'POST',
 						data : {
 							action      : 'cartflows_activate_plugin',
-							plugin_init : plugin.init
+							plugin_init : plugin.init,
+							security    : CartFlowsImportVars.cartflows_activate_plugin_nonce
 						},
 					})
 					.done(function( request, status, XHR )
@@ -1169,7 +1171,8 @@ var CartFlowsAjaxQueue = (function() {
 
 			var data = {
 				action      : 'cartflows_activate_plugin',
-				plugin_init : plugin_init
+				plugin_init : plugin_init,
+				security    : CartFlowsImportVars.cartflows_activate_plugin_nonce
 			};
 
 			self._ajax( data, function( data ) {
@@ -1535,7 +1538,8 @@ var CartFlowsAjaxQueue = (function() {
 				type : 'POST',
 				data : {
 					action      : 'cartflows_activate_plugin',
-					plugin_init : 'woocommerce/woocommerce.php'
+					plugin_init : 'woocommerce/woocommerce.php',
+					security    : CartFlowsImportVars.cartflows_activate_plugin_nonce
 				},
 			})
 				.done(function( request, status, XHR )

@@ -10,6 +10,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Fatal error mb_strpos fallback.
+ *
+ * @param string $string string where to find.
+ * @param string $search string to search.
+ * @since 1.0.0
+ */
+function wcf_mb_strpos( $string, $search ) {
+
+	if ( function_exists( 'mb_strpos' ) ) {
+		return mb_strpos( $string, $search );
+	} else {
+		return strpos( $string, $search );
+	}
+}
+
+/**
  * Check if cartflows pro activated.
  *
  * @since 1.0.0

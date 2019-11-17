@@ -874,7 +874,6 @@ if ( ! class_exists( 'CartFlows_Importer' ) ) :
 						</ul>
 
 						<?php
-
 						/*
 						<# } else { #>
 							<select class="{{ data.args.wrapper_class }} {{ data.args.class }}">
@@ -1026,6 +1025,8 @@ if ( ! class_exists( 'CartFlows_Importer' ) ) :
 
 				'default_page_builder'     => Cartflows_Helper::get_common_setting( 'default_page_builder' ),
 			);
+
+			$localize_vars['cartflows_activate_plugin_nonce'] = wp_create_nonce( 'cartflows_activate_plugin' );
 
 			// var_dump(Cartflows_Helper::get_common_setting( 'default_page_builder' ));
 			// wp_die(  );
@@ -1637,6 +1638,19 @@ if ( ! class_exists( 'CartFlows_Importer' ) ) :
 		 * Ajax action to activate plugin
 		 */
 		public function activate_plugin() {
+
+			if ( ! check_ajax_referer( 'cartflows_activate_plugin', 'security', false ) ) {
+				wp_send_json_error( esc_html__( 'Action failed. Invalid Security Nonce.', 'cartflows' ) );
+			}
+
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				wp_send_json_error(
+					array(
+						'success' => false,
+						'message' => __( 'User have not plugin install permissions.', 'cartflows' ),
+					)
+				);
+			}
 
 			$plugin_init = isset( $_POST['plugin_init'] ) ? sanitize_text_field( $_POST['plugin_init'] ) : '';
 

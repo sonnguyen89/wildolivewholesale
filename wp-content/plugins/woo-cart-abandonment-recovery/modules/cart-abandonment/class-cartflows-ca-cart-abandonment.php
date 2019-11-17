@@ -66,6 +66,9 @@ class Cartflows_Ca_Cart_Abandonment {
 
 			add_action( 'wp_ajax_wcf_ca_preview_email_send', array( $this, 'send_preview_email' ) );
 
+			// Delete coupons.
+			add_action( 'wp_ajax_wcf_ca_delete_garbage_coupons', array( $this, 'delete_used_and_expired_coupons' ) );
+
 			$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 			if ( WCF_CA_PAGE_NAME === $page ) {
 				// Adding filter to add new button to add custom fields.
@@ -79,12 +82,14 @@ class Cartflows_Ca_Cart_Abandonment {
 			if ( ! wp_next_scheduled( 'cartflows_ca_update_order_status_action' ) ) {
 				wp_schedule_event( time(), 'every_fifteen_minutes', 'cartflows_ca_update_order_status_action' );
 			}
-			add_action( 'cartflows_ca_update_order_status_action', array( $this, 'update_order_status' ) );
 
+			// Adding notice to checkout page to inform about test email checkout page.
+			add_action( 'woocommerce_before_checkout_form', array( $this, 'test_email_checkout_page' ), 9 );
+
+			add_action( 'cartflows_ca_update_order_status_action', array( $this, 'update_order_status' ) );
 		}
 
 	}
-
 
 	/**
 	 * Update the Order status.
@@ -96,6 +101,10 @@ class Cartflows_Ca_Cart_Abandonment {
 	public function wcf_ca_update_order_status( $order_id, $old_order_status, $new_order_status ) {
 
 		$acceptable_order_statuses = array( 'completed', 'processing', 'failed' );
+
+		if ( ( WCF_CART_FAILED_ORDER === $new_order_status ) ) {
+			return;
+		}
 
 		if ( $order_id && in_array( $new_order_status, $acceptable_order_statuses, true ) ) {
 
@@ -114,21 +123,20 @@ class Cartflows_Ca_Cart_Abandonment {
 				}
 
 				if ( ( WCF_CART_ABANDONED_ORDER === $capture_status || WCF_CART_LOST_ORDER === $capture_status ) ) {
-					$wpdb->update( $cart_abandonment_table, array( 'order_status' => WCF_CART_COMPLETED_ORDER ), array( 'session_id' => sanitize_key( $captured_data->session_id ) ) );
+					$this->skip_future_emails_when_order_is_completed( sanitize_key( $captured_data->session_id ) );
 					$this->trigger_zapier_webhook( $captured_data->session_id, WCF_CART_COMPLETED_ORDER );
 					$note = __( 'This order was abandoned & subsequently recovered.', 'woo-cart-abandonment-recovery' );
 					$order->add_order_note( $note );
 					$order->save();
-				}
-
-				if ( WCF_CART_COMPLETED_ORDER === $capture_status ) {
-					// Revert the complete order status to abandoned when payment failed.
-					$wpdb->update( $cart_abandonment_table, array( 'order_status' => WCF_CART_ABANDONED_ORDER ), array( 'session_id' => sanitize_key( $captured_data->session_id ) ) );
+					if ( WC()->session ) {
+						WC()->session->__unset( 'wcf_session_id' );
+					}
 				}
 			}
 		}
 
 	}
+
 
 	/**
 	 *  Send preview emails.
@@ -212,15 +220,17 @@ class Cartflows_Ca_Cart_Abandonment {
 			$new_coupon_id = wp_insert_post( $coupon );
 
 			update_post_meta( $new_coupon_id, 'discount_type', $discount_type );
-			update_post_meta( $new_coupon_id, 'description', 'This coupon is for abandoned cart email templates.' );
+			update_post_meta( $new_coupon_id, 'description', WCF_CA_COUPON_DESCRIPTION );
 			update_post_meta( $new_coupon_id, 'coupon_amount', $amount );
 			update_post_meta( $new_coupon_id, 'individual_use', $individual_use );
 			update_post_meta( $new_coupon_id, 'product_ids', '' );
 			update_post_meta( $new_coupon_id, 'exclude_product_ids', '' );
 			update_post_meta( $new_coupon_id, 'usage_limit', '1' );
+			update_post_meta( $new_coupon_id, 'usage_count', '0' );
 			update_post_meta( $new_coupon_id, 'date_expires', $expiry );
 			update_post_meta( $new_coupon_id, 'apply_before_tax', 'yes' );
 			update_post_meta( $new_coupon_id, 'free_shipping', $free_shipping );
+			update_post_meta( $new_coupon_id, 'coupon_generated_by', WCF_CA_COUPON_GENERATED_BY );
 
 			return $coupon_code;
 	}
@@ -300,7 +310,11 @@ class Cartflows_Ca_Cart_Abandonment {
 		define( 'WCF_DEFAULT_COUPON_AMOUNT', 10 );
 
 		define( 'WCF_CA_DATETIME_FORMAT', 'Y-m-d H:i:s' );
+
+		define( 'WCF_CA_COUPON_DESCRIPTION', 'This coupon is for abandoned cart email templates.' );
+		define( 'WCF_CA_COUPON_GENERATED_BY', 'woo-cart-abandonment-recovery' );
 	}
+
 
 	/**
 	 * Restore cart abandonemnt data on checkout page.
@@ -332,15 +346,19 @@ class Cartflows_Ca_Cart_Abandonment {
 					wc_clear_notices();
 					foreach ( $cart_content as $cart_item ) {
 
+						$cart_item_data = array();
+						$id             = $cart_item['product_id'];
+						$qty            = $cart_item['quantity'];
+
 						// Skip bundled products when added main product.
 						if ( isset( $cart_item['bundled_by'] ) ) {
 							continue;
 						}
 
-						$id  = $cart_item['product_id'];
-						$qty = $cart_item['quantity'];
+						if ( isset( $cart_item['ppom'] ) ) {
+							$cart_item_data['ppom'] = $cart_item ['ppom'];
+						}
 
-						$cart_item_data = array();
 						if ( isset( $cart_item['cartflows_bump'] ) ) {
 							$cart_item_data['cartflows_bump'] = $cart_item['cartflows_bump'];
 						}
@@ -382,6 +400,20 @@ class Cartflows_Ca_Cart_Abandonment {
 		}
 		return $fields;
 	}
+
+	/**
+	 * Add notice to inform user about test email checkout page.
+	 */
+	function test_email_checkout_page() {
+
+		$wcf_ac_token = filter_input( INPUT_GET, 'wcf_ac_token', FILTER_SANITIZE_STRING );
+		$token_data   = $this->wcf_decode_token( $wcf_ac_token );
+		if ( is_checkout() && ! is_wc_endpoint_url() && isset( $token_data['wcf_preview_email'] ) && $token_data['wcf_preview_email'] ) {
+			wc_print_notice( __( 'This checkout page is generated by WooCommerce Cart Abandonment Recovery plugin from test mail.', 'woo-cart-abandonment-recovery' ), 'notice' );
+		}
+	}
+
+
 	/**
 	 * Load cart abandonemnt tracking script.
 	 *
@@ -395,7 +427,8 @@ class Cartflows_Ca_Cart_Abandonment {
 		$role                = array_shift( $roles );
 		if ( ! empty( $wcf_ca_ignore_users ) ) {
 			foreach ( $wcf_ca_ignore_users as $user ) {
-				$user = lcfirst( $user );
+				$user = strtolower( $user );
+				$role = preg_replace( '/_/', ' ', $role );
 				if ( $role === $user ) {
 					return;
 				}
@@ -443,6 +476,59 @@ class Cartflows_Ca_Cart_Abandonment {
 			}
 		}
 		return $is_valid;
+	}
+
+	/**
+	 * Check before emails actually send to user.
+	 *
+	 * @param array $email_data email_data.
+	 * @param array $current_cart_data cart data.
+	 * @return bool
+	 */
+	function check_if_already_purchased_by_email_product_ids( $email_data, $current_cart_data ) {
+
+		global $wpdb;
+		$current_cart_data = unserialize( $current_cart_data );
+
+		// Fetch products & variations.
+		$products         = array_values( wp_list_pluck( $current_cart_data, 'product_id' ) );
+		$variations       = array_values( wp_list_pluck( $current_cart_data, 'variation_id' ) );
+		$current_products = array_unique( array_merge( $products, $variations ) );
+
+		$cart_abandonment_table = $wpdb->prefix . CARTFLOWS_CA_CART_ABANDONMENT_TABLE;
+
+		$orders             = wc_get_orders(
+			array(
+				'billing_email' => $email_data->email,
+				'status'        => [ 'processing', 'completed' ],
+				'date_after'    => date(
+					'Y-m-d h:i:s',
+					strtotime( '-30 days' )
+				),
+			)
+		);
+		$need_to_send_email = true;
+
+		foreach ( $orders as $order ) {
+			$order = wc_get_order( $order->get_id() );
+			$items = $order->get_items();
+
+			foreach ( $order->get_items() as $item_id => $item_data ) {
+
+				$product_id = $item_data->get_product()->get_id();
+
+				if ( in_array( $product_id, $current_products, true ) ) {
+
+					/**
+					 * Remove duplicate captured order for tracking.
+					 */
+					$wpdb->delete( $cart_abandonment_table, array( 'session_id' => sanitize_key( $email_data->session_id ) ) );
+					$need_to_send_email = false;
+					break;
+				}
+			}
+		}
+		return $need_to_send_email;
 	}
 
 	/**
@@ -524,6 +610,15 @@ class Cartflows_Ca_Cart_Abandonment {
 			)
 		);
         // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		/**
+		 * Delete garbage coupons.
+		 */
+		$wcf_ca_auto_delete_coupons = get_option( 'wcf_ca_auto_delete_coupons' );
+
+		if ( isset( $wcf_ca_auto_delete_coupons ) && 'on' === $wcf_ca_auto_delete_coupons ) {
+			$this->delete_used_and_expired_coupons();
+		}
 
 	}
 
@@ -691,7 +786,6 @@ class Cartflows_Ca_Cart_Abandonment {
 	 * @since 1.0.0
 	 */
 	function save_cart_abandonment_data() {
-
 		check_ajax_referer( 'cartflows_save_cart_abandonment_data', 'security' );
 		$post_data = $this->sanitize_post_data();
 		if ( isset( $post_data['wcf_email'] ) ) {
@@ -721,27 +815,32 @@ class Cartflows_Ca_Cart_Abandonment {
 				$session_id = md5( uniqid( rand(), true ) );
 			}
 
-			if ( ( ! is_null( $session_id ) ) && ! is_null( $session_checkout_details ) ) {
+			if ( isset( $checkout_details['cart_total'] ) && $checkout_details['cart_total'] > 0 ) {
 
-				// Updating row in the Database where users Session id = same as prevously saved in Session.
-				$wpdb->update(
-					$cart_abandonment_table,
-					$checkout_details,
-					array( 'session_id' => $session_id )
-				);
+				if ( ( ! is_null( $session_id ) ) && ! is_null( $session_checkout_details ) ) {
 
+					// Updating row in the Database where users Session id = same as prevously saved in Session.
+					$wpdb->update(
+						$cart_abandonment_table,
+						$checkout_details,
+						array( 'session_id' => $session_id )
+					);
+
+				} else {
+
+					$checkout_details['session_id'] = sanitize_text_field( $session_id );
+					// Inserting row into Database.
+					$wpdb->insert(
+						$cart_abandonment_table,
+						$checkout_details
+					);
+
+					// Storing session_id in WooCommerce session.
+					WC()->session->set( 'wcf_session_id', $session_id );
+
+				}
 			} else {
-
-				$checkout_details['session_id'] = sanitize_text_field( $session_id );
-				// Inserting row into Database.
-				$wpdb->insert(
-					$cart_abandonment_table,
-					$checkout_details
-				);
-
-				// Storing session_id in WooCommerce session.
-				WC()->session->set( 'wcf_session_id', $session_id );
-
+				$wpdb->delete( $cart_abandonment_table, array( 'session_id' => sanitize_key( $session_id ) ) );
 			}
 
 			wp_send_json_success();
@@ -832,26 +931,7 @@ class Cartflows_Ca_Cart_Abandonment {
 				} else {
 					if ( $checkout_details && ( WCF_CART_ABANDONED_ORDER === $checkout_details->order_status || WCF_CART_LOST_ORDER === $checkout_details->order_status ) ) {
 
-						// Skip Future email sending..
-						$wpdb->update(
-							$email_history_table,
-							array( 'email_sent' => -1 ),
-							array(
-								'ca_session_id' => $session_id,
-								'email_sent'    => 0,
-							)
-						);
-
-						// Update order status.
-						$wpdb->update(
-							$cart_abandonment_table,
-							array(
-								'order_status' => WCF_CART_COMPLETED_ORDER,
-							),
-							array(
-								'session_id' => $session_id,
-							)
-						);
+						$this->skip_future_emails_when_order_is_completed( $session_id );
 
 						$this->trigger_zapier_webhook( $session_id, WCF_CART_COMPLETED_ORDER );
 
@@ -874,15 +954,7 @@ class Cartflows_Ca_Cart_Abandonment {
 								$existing_cart_products = array_keys( (array) $existing_cart_contents );
 								$order_cart_products    = array_keys( (array) $order_cart_contents );
 								if ( $this->check_if_similar_cart( $existing_cart_products, $order_cart_products ) ) {
-									$wpdb->update(
-										$cart_abandonment_table,
-										array(
-											'order_status' => WCF_CART_COMPLETED_ORDER,
-										),
-										array(
-											'session_id' => $order_data->session_id,
-										)
-									);
+									$this->skip_future_emails_when_order_is_completed( $order_data->session_id );
 								}
 							}
 						}
@@ -890,10 +962,45 @@ class Cartflows_Ca_Cart_Abandonment {
 					}
 				}
 			}
-			WC()->session->__unset( 'wcf_session_id' );
+			if ( WC()->session ) {
+				WC()->session->__unset( 'wcf_session_id' );
+			}
 		}
 	}
 
+	/**
+	 * Unschedule future emails for completed orders.
+	 *
+	 * @param string $session_id session id.
+	 * @param bool   $skip_complete skip update query.
+	 */
+	function skip_future_emails_when_order_is_completed( $session_id, $skip_complete = false ) {
+
+		global $wpdb;
+		$email_history_table    = $wpdb->prefix . CARTFLOWS_CA_EMAIL_HISTORY_TABLE;
+		$cart_abandonment_table = $wpdb->prefix . CARTFLOWS_CA_CART_ABANDONMENT_TABLE;
+
+		if ( ! $skip_complete ) {
+			$wpdb->update(
+				$cart_abandonment_table,
+				array(
+					'order_status' => WCF_CART_COMPLETED_ORDER,
+				),
+				array(
+					'session_id' => sanitize_key( $session_id ),
+				)
+			);
+		}
+
+		$wpdb->update(
+			$email_history_table,
+			array( 'email_sent' => -1 ),
+			array(
+				'ca_session_id' => $session_id,
+				'email_sent'    => 0,
+			)
+		);
+	}
 
 	/**
 	 * Compare cart if similar products.
@@ -1076,6 +1183,21 @@ class Cartflows_Ca_Cart_Abandonment {
 
 		// Styles.
 		wp_enqueue_style( 'cartflows-cart-abandonment-admin', CARTFLOWS_CA_URL . 'admin/assets/css/admin-cart-abandonment.css', array(), CARTFLOWS_CA_VER );
+
+		wp_enqueue_script(
+			'cartflows-ca-email-tmpl-settings',
+			CARTFLOWS_CA_URL . 'admin/assets/js/admin-email-templates.js',
+			array( 'jquery' ),
+			CARTFLOWS_CA_VER
+		);
+
+		$vars = array(
+			'url'                  => 'admin-ajax.php',
+			'_delete_coupon_nonce' => wp_create_nonce( 'wcf_ca_delete_garbage_coupons' ),
+			'_confirm_msg'         => __( 'Do you really want to delete the used and expired coupons created by Cart Abandonment Plugin?', 'woo-cart-abandonment-recovery' ),
+
+		);
+		wp_localize_script( 'cartflows-ca-email-tmpl-settings', 'wcf_ca_delete_coupons', $vars );
 
 	}
 
@@ -1417,7 +1539,6 @@ class Cartflows_Ca_Cart_Abandonment {
 			)
 		);
         // phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
 		foreach ( $emails_send_to as $email_send_to ) {
 			$email_result = $this->send_email_templates( $email_send_to );
 			if ( $email_result ) {
@@ -1506,6 +1627,10 @@ class Cartflows_Ca_Cart_Abandonment {
 
 		if ( filter_var( $email_data->email, FILTER_VALIDATE_EMAIL ) ) {
 
+			if ( ! $this->check_if_already_purchased_by_email_product_ids( $email_data, $email_data->cart_contents ) ) {
+				return false;
+			}
+
 			$other_fields = unserialize( $email_data->other_fields );
 
 			$from_email_name    = get_option( 'wcf_ca_from_name' );
@@ -1541,8 +1666,9 @@ class Cartflows_Ca_Cart_Abandonment {
 			$auto_apply_coupon = $email_instance->get_email_template_meta_by_key( $email_data->email_template_id, 'auto_coupon' );
 
 			$token_data = array(
-				'wcf_session_id'  => $email_data->session_id,
-				'wcf_coupon_code' => isset( $auto_apply_coupon ) && $auto_apply_coupon->meta_value ? $coupon_code : null,
+				'wcf_session_id'    => $email_data->session_id,
+				'wcf_coupon_code'   => isset( $auto_apply_coupon ) && $auto_apply_coupon->meta_value ? $coupon_code : null,
+				'wcf_preview_email' => $preview_email ? true : false,
 			);
 
 			$checkout_url = $this->get_checkout_url( $email_data->checkout_id, $token_data );
@@ -1778,43 +1904,6 @@ class Cartflows_Ca_Cart_Abandonment {
 	}
 
 	/**
-	 * Copied WC function for date parameter addition.
-	 *
-	 * @param string $customer_email customer email.
-	 * @param int    $product_id product id.
-	 * @param int    $days days.
-	 * @return array|bool|mixed|void
-	 */
-	function wcf_ca_wc_customer_bought_product( $customer_email, $product_id, $days = 365 ) {
-		global $wpdb;
-
-		$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(p.ID) FROM {$wpdb->prefix}posts AS p
-                            INNER JOIN {$wpdb->prefix}postmeta AS pm ON p.ID = pm.post_id
-                            INNER JOIN {$wpdb->prefix}woocommerce_order_items AS woi ON p.ID = woi.order_id
-                            INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS woim ON woi.order_item_id = woim.order_item_id
-                            WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-                            AND pm.meta_key = '_billing_email'
-                            AND pm.meta_value = %s
-                            AND woim.meta_key IN ( '_product_id', '_variation_id' )
-                            AND woim.meta_value = %s
-                            AND p.post_date > '" . date( 'Y-m-d', strtotime( '-' . $days . ' days' ) ) . "'
-                            ",
-				$customer_email,
-				$product_id
-			)
-		);
-
-        // phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
-		return intval( $result ) > 0 ? true : false;
-
-	}
-
-	/**
 	 * Schedule events for the abadoned carts to send emails.
 	 *
 	 * @param integer $session_id user session id.
@@ -1830,29 +1919,7 @@ class Cartflows_Ca_Cart_Abandonment {
 		$scheduled_time_from = current_time( WCF_CA_DATETIME_FORMAT );
 		$scheduled_emails    = $this->fetch_scheduled_emails( $session_id );
 		$scheduled_templates = array_column( $scheduled_emails, 'template_id' );
-
-		// Skip if forcfully rescheduled.
-		if ( ! $force_reschedule ) {
-			$scheduled_time_from = $checkout_details->time;
-			$user_exist          = get_user_by( 'email', $checkout_details->email );
-			// Don't schedule emails if products are already purchased.
-			if ( $user_exist ) {
-				$purchasing_products = unserialize( $checkout_details->cart_contents );
-				$already_purchased   = true;
-				foreach ( $purchasing_products as $purchasing_product ) {
-					if ( isset( $purchasing_product['product_id'] ) ) {
-						$has_already_purchased = $this->wcf_ca_wc_customer_bought_product( $user_exist->user_email, $purchasing_product['product_id'], 30 );
-						if ( ! $has_already_purchased ) {
-							$already_purchased = false;
-							break;
-						}
-					}
-				}
-				if ( $already_purchased ) {
-					return;
-				}
-			}
-		}
+		$scheduled_time_from = $checkout_details->time;
 
 		$email_tmpl = Cartflows_Ca_Email_Templates::get_instance();
 		$templates  = $email_tmpl->fetch_all_active_templates();
@@ -1928,10 +1995,6 @@ class Cartflows_Ca_Cart_Abandonment {
 		return $result;
 	}
 
-
-
-
-
 	/**
 	 * Delete orders from cart abandonment table whose cart total is zero and order status is abandoned.
 	 */
@@ -1941,10 +2004,78 @@ class Cartflows_Ca_Cart_Abandonment {
 		$cart_abandonment_table = $wpdb->prefix . CARTFLOWS_CA_CART_ABANDONMENT_TABLE;
 
 		$where = array(
-			'cart_contents' => 'a:0:{}',
+			'cart_total' => 0,
 		);
 
 		$wpdb->delete( $cart_abandonment_table, $where );
+	}
+
+
+	/**
+	 * Check if transient is set for delete garbage coupons.
+	 */
+	function delete_used_and_expired_coupons() {
+		$is_ajax_request  = wp_doing_ajax();
+		$is_transient_set = false;
+		global $wpdb;
+		if ( $is_ajax_request ) {
+			check_ajax_referer( 'wcf_ca_delete_garbage_coupons', 'security' );
+		} else {
+			$is_transient_set = get_transient( 'woocommerce_ca_delete_garbage_coupons' );
+		}
+
+		if ( false === $is_transient_set || $is_ajax_request ) {
+			$coupons      = $this->delete_garbage_coupons();
+			$coupon_count = count( $coupons );
+
+			if ( $coupon_count ) {
+				$coupons_post_ids = implode( ',', wp_list_pluck( $coupons, 'ID' ) );
+				$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE post_id IN(" . $coupons_post_ids . ')' );//phpcs:ignore
+				$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE ID IN(" . $coupons_post_ids . ')' );//phpcs:ignore
+			}
+
+			if ( ! $is_ajax_request ) {
+				set_transient( 'woocommerce_ca_delete_garbage_coupons', $coupons, WEEK_IN_SECONDS );
+				return;
+			}
+
+			// translators: %1$s: Coupons Deleted, %2$s: Deleted coupons count'.
+			wp_send_json_success( sprintf( __( '%1$s: %2$d', 'woo-cart-abandonment-recovery' ), 'Coupons Deleted', $coupon_count ) );
+
+		}
+	}
+
+
+	/**
+	 * Set transient and delete garbage coupons.
+	 */
+	function delete_garbage_coupons() {
+
+		global $wpdb;
+		$coupon_generated_by = WCF_CA_COUPON_GENERATED_BY;
+		$timestamp           = time();
+		$post_type           = 'shop_coupon';
+		$coupons             = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, coupon_code, usage_limit, total_usaged, expiry_date FROM (
+			    SELECT p.ID, 
+			    p.post_title AS coupon_code, 	
+			    Max(CASE WHEN pm.meta_key = 'date_expires'    AND  p.`ID` = pm.`post_id` THEN pm.meta_value END) AS expiry_date,                       
+			    Max(CASE WHEN pm.meta_key = 'usage_limit'     AND  p.`ID` = pm.`post_id` THEN pm.meta_value END) AS usage_limit,                
+			    Max(CASE WHEN pm.meta_key = 'usage_count'     AND  p.`ID` = pm.`post_id` THEN pm.meta_value END) AS total_usaged,
+			    Max(CASE WHEN pm.meta_key = 'coupon_generated_by'     AND  p.`ID` = pm.`post_id` THEN pm.meta_value END) AS coupon_generated_by
+			    FROM   wp_posts AS p 
+			    INNER JOIN wp_postmeta AS pm ON  p.ID = pm.post_id 
+				WHERE  p.`post_type` = %s     
+       
+		  		GROUP BY p.ID
+    			) AS final_res WHERE coupon_generated_by IS NOT NULL AND coupon_generated_by = %s AND ( ( usage_limit = total_usaged ) OR ( expiry_date <= %d AND expiry_date != '') )",
+				$post_type,
+				$coupon_generated_by,
+				$timestamp
+			)
+		);
+		return $coupons;
 	}
 
 }

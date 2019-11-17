@@ -2,8 +2,8 @@
 Contributors: automattic, woothemes, royho, akeda, mattyza, bor0, dwainm, laurendavissmith001, mikejolley, kloon, jeffstieler
 Tags: credit card, eway, payment request, gateway, woocommerce, automattic
 Requires at least: 4.4
-Tested up to: 5.0
-Stable tag: 3.1.22
+Tested up to: 5.3
+Stable tag: 3.1.23
 Requires PHP: 5.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -18,7 +18,7 @@ The eWAY payment gateway for WooCommerce makes use of eWAY’s brand new Rapid 3
 
 By using eWAY’s Rapid 3.1 API there is a single endpoint for processing payment, meaning you only need this one extension to take payment through any of eWAY’s processing countries, eWAY Australia, eWAY New Zealand, eWAY Singapore, eWAY Malaysia, and eWAY Hong Kong. eWAY uses complex DNS technology to ensure your payment is routed to the correct country.
 
-= Key Features
+= Key Features =
 
 * Ability to host promotional flash sales in real-time
 * Generate discount coupons for your customers to help with special promotions
@@ -83,13 +83,18 @@ If you get stuck, you can ask for help in the Plugin Forum.
 
 == Changelog ==
 
-= 2019-08-09 - version 3.1.22
+= 2019-10-29 - version 3.1.23 =
+* Fix    - Use order currency instead of store currency.
+* Tweak  - WC 3.8 compatibility.
+* Tweak  - WP 5.3 compatibility.
+
+= 2019-08-09 - version 3.1.22 =
 * Tweak  - WC 3.7 compatibility.
 
-= 2019-07-02 - version 3.1.21
+= 2019-07-02 - version 3.1.21 =
 * Tweak  - Add JCB to card types.
 
-= 2019-04-16 - version 3.1.20
+= 2019-04-16 - version 3.1.20 =
 * Tweak  - WC 3.6 compatibility.
 
 = 2018-11-19 - version 3.1.19 =

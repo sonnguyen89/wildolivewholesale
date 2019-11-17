@@ -273,7 +273,6 @@
 
 .et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout .col2-set,
 .et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout .wcf-col2-set, 
-.et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout .wcf-order-wrap, 
 .et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout .wcf-product-option-wrap{
     display: block;
     width: 100%;
@@ -302,8 +301,11 @@
     display: none !important;
 }
 
-.et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout #order_review{
+.et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout .wcf-order-wrap{
     display: none;
+}
+
+.et_pb_module #wcf-embed-checkout-form.wcf-embed-checkout-form-two-step .woocommerce-checkout #order_review{
     float: none;
     width: 100%;
 }

@@ -24,7 +24,7 @@
 		}
 		?>
 		<a href="<?php echo $back_link; ?>" class="button button-secondary back-button"><span
-					class="dashicons dashicons-arrow-left"></span> Back to Reports </a>
+					class="dashicons dashicons-arrow-left"></span> <?php _e( 'Back to Reports', 'woo-cart-abandonment-recovery' ); ?> </a>
 	</div>
 </div>
 
@@ -44,24 +44,29 @@
 						<div id="wcf-ca-confirm-email-reschedule" style="display:none;">
 							<div style="text-align:center;">
 								<p>
-									All new activated emails will be reschedule for this abandoned order. <br/>New emails will
-									be sent to user according to schedule time.
+									<?php
+									_e(
+										'All new activated emails will be reschedule for this abandoned order. <br/>New emails will
+											be sent to user according to schedule time.',
+										'woo-cart-abandonment-recovery'
+									);
+									?>
 								</p>
 								<p>
-									<strong>Are your sure?</strong>
+									<strong><?php _e( 'Are your sure?', 'woo-cart-abandonment-recovery' ); ?></strong>
 								</p>
 								<p>
 									<button onclick="window.location.search += '&sub_action=<?php echo WCF_SUB_ACTION_REPORTS_RESCHEDULE; ?>';"
-											class="button button-secondary"> Reschedule
+											class="button button-secondary"> <?php _e( 'Reschedule', 'woo-cart-abandonment-recovery' ); ?>
 									</button>
 									<button type="button"
 											onclick='document.getElementById("TB_closeWindowButton").click()'
-											class="button button-secondary"> Close
+											class="button button-secondary"> <?php _e( 'Close', 'woo-cart-abandonment-recovery' ); ?>
 									</button>
 								</p>
 							</div>
 						</div>
-						<a name="Do you really want to reschedule emails?" href="#TB_inline?&width=500&height=200&inlineId=wcf-ca-confirm-email-reschedule" class="thickbox button button-secondary"> Reschedule Emails </a>
+						<a name="Do you really want to reschedule emails?" href="#TB_inline?&width=500&height=200&inlineId=wcf-ca-confirm-email-reschedule" class="thickbox button button-secondary"> <?php _e( 'Reschedule Emails', 'woo-cart-abandonment-recovery' ); ?> </a>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -74,11 +79,11 @@
 					<thead>
 					<tr>
 
-						<th class="wcf-ca-report-table-row"> Scheduled Template</th>
-						<th class="wcf-ca-report-table-row"> Email Subject</th>
-						<th class="wcf-ca-report-table-row"> Email Coupon</th>
-						<th class="wcf-ca-report-table-row"> Email Sent</th>
-						<th class="wcf-ca-report-table-row"><span class="dashicons dashicons-clock"></span> Scheduled At
+						<th class="wcf-ca-report-table-row"> <?php _e( 'Scheduled Template', 'woo-cart-abandonment-recovery' ); ?></th>
+						<th class="wcf-ca-report-table-row"> <?php _e( 'Email Subject', 'woo-cart-abandonment-recovery' ); ?></th>
+						<th class="wcf-ca-report-table-row"> <?php _e( 'Email Coupon', 'woo-cart-abandonment-recovery' ); ?></th>
+						<th class="wcf-ca-report-table-row"> <?php _e( 'Email Sent', 'woo-cart-abandonment-recovery' ); ?></th>
+						<th class="wcf-ca-report-table-row"><span class="dashicons dashicons-clock"></span> <?php _e( 'Scheduled At', 'woo-cart-abandonment-recovery' ); ?>
 						</th>
 
 					</tr>

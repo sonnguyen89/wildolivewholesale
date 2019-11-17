@@ -5,12 +5,12 @@
  * Plugin URI: https://woocommerce.com/products/eway/
  * Author: WooCommerce
  * Author URI: https://woocommerce.com/
- * Version: 3.1.22
+ * Version: 3.1.23
  * Text Domain: wc-eway
  * Domain Path: /languages
  * Requires at least: 4.4
- * Tested up to: 5.0
- * WC tested up to: 3.7
+ * Tested up to: 5.3
+ * WC tested up to: 3.8
  * WC requires at least: 2.6
  * Copyright: © 2014-2018 WooCommerce.
  * License: GNU General Public License v3.0

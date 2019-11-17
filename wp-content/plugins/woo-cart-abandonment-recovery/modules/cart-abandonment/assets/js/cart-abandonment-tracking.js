@@ -76,8 +76,14 @@
 
             var wcf_phone = jQuery("#billing_phone").val();
             var wcf_email = jQuery("#billing_email").val();
+
+            if( typeof wcf_email === 'undefined' ){
+                return ;
+            }
+
             var atposition = wcf_email.indexOf("@");
             var dotposition = wcf_email.lastIndexOf(".");
+           
 
             if (typeof wcf_phone === 'undefined' || wcf_phone === null) { //If phone number field does not exist on the Checkout form
                 wcf_phone = '';

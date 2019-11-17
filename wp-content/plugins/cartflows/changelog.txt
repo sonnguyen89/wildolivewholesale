@@ -1,3 +1,12 @@
+Version 1.3.1 - Wednesday, 6th November 2019
+- Improvement: Added compatibility for a future release of CartFlows Pro.
+- Fix: Security issue fix & added user capability check.
+
+Version 1.3.0 - Tuesday, 15th October 2019
+- New: Native Facebook pixel support added.
+- Fix: Fallback added for mb_strpos function fatal error for older PHP versions.
+- Fix: DIVI two step unused CSS removed.
+
 Version 1.2.6 - Tuesday, 27th August 2019
 - New: 'wp_body_open' action support added in templates. 
 - Improvement: Added compatibility for a future release of CartFlows Pro.

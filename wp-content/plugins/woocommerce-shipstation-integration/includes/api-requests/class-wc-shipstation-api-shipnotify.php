@@ -109,7 +109,7 @@ class WC_Shipstation_API_Shipnotify extends WC_Shipstation_API_Request {
 	/**
 	 * Retrieves the raw request data (body).
 	 *
-	 * `$HTTP_RAW_POST_DATA` is deprecated in PHP 5.6 and removed in PHP 5.7,
+	 * `$HTTP_RAW_POST_DATA` is deprecated in PHP 5.6 and removed in PHP 7.0,
 	 * it's used here for server that has issue with reading `php://input`
 	 * stream.
 	 *

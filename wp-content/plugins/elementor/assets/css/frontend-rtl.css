@@ -1,4 +1,4 @@
-/*! elementor - v2.7.4 - 06-10-2019 */
+/*! elementor - v2.7.5 - 28-10-2019 */
 .dialog-widget-content {
   background-color: #fff;
   position: absolute;
@@ -2303,7 +2303,7 @@ body.elementor-page .elementor-widget-menu-anchor {
     background-color: #487AA2; }
   .elementor-social-icon-link {
     background-color: #818a91; }
-  .elementor-social-icon-linkedin {
+  .elementor-social-icon-linkedin, .elementor-social-icon-linkedin-in {
     background-color: #0077b5; }
   .elementor-social-icon-medium {
     background-color: #00ab6b; }

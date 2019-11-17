@@ -35,6 +35,46 @@
 		}
 	};
 
+	var trigger_facebook_events = function () {
+		if ('enable' === cartflows.fb_active['facebook_pixel_tracking']) {
+
+			if (cartflows.fb_active['facebook_pixel_id'] != '') {
+
+				var facebook_pixel = cartflows.fb_active['facebook_pixel_id'];
+				var initial_checkout_event = cartflows.fb_active['facebook_pixel_initiate_checkout'];
+				var purchase_event = cartflows.fb_active['facebook_pixel_purchase_complete'];
+				var add_payment_info_event = cartflows.fb_active['facebook_pixel_add_payment_info'];
+				var is_checkout_page = cartflows.is_checkout_page;
+
+				fbq('init', facebook_pixel);
+				fbq('track', 'PageView', {'plugin': 'CartFlows'});
+
+				if ('enable' === initial_checkout_event) {
+					if ('1' === is_checkout_page) {
+						fbq('track', 'AddToCart', cartflows.params);
+						fbq('track', 'InitiateCheckout', cartflows.params);
+					}
+				}
+
+				if ('enable' === purchase_event) {
+					var order_details = $.cookie('wcf_order_details');
+					if (typeof order_details !== 'undefined') {
+						fbq('track', 'Purchase', jQuery.parseJSON(order_details));
+						$.removeCookie('wcf_order_details', {path: '/'});
+					}
+				}
+
+				if ('enable' === add_payment_info_event) {
+					jQuery("form.woocommerce-checkout").on('submit', function () {
+						var params = cartflows.params;
+						fbq('track', 'AddPaymentInfo', params);
+					});
+				}
+
+			}
+		}
+	}
+
 	$(document).ready(function($) {
 		
 		/* Assign the class & link to specific button */
@@ -45,7 +85,8 @@
 			next_links.attr( 'href', cartflows.next_step );
 		}
 		remove_oceanwp_custom_style();
-		
+
+		trigger_facebook_events();
 	});
 	
 })(jQuery);

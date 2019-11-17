@@ -39,7 +39,6 @@ class Cartflows_Ca_Email_Templates_Table extends WP_List_Table {
 		);
 
 		$this->base_url = admin_url( 'admin.php?page=' . WCF_CA_PAGE_NAME . '&action=' . WCF_ACTION_EMAIL_TEMPLATES );
-
 	}
 
 	/**
@@ -183,7 +182,7 @@ class Cartflows_Ca_Email_Templates_Table extends WP_List_Table {
 			'template_name' => __( 'Template Name', 'woo-cart-abandonment-recovery' ),
 			'email_subject' => __( 'Email Subject', 'woo-cart-abandonment-recovery' ),
 			'trigger_time'  => __( 'Trigger After', 'woo-cart-abandonment-recovery' ),
-			'is_activated'  => __( 'Is Activated?', 'woo-cart-abandonment-recovery' ),
+			'is_activated'  => __( 'Activate Template', 'woo-cart-abandonment-recovery' ),
 
 		);
 		return $columns;
@@ -209,11 +208,21 @@ class Cartflows_Ca_Email_Templates_Table extends WP_List_Table {
 	 * Column name trigger_time.
 	 *
 	 * @param  object $item item.
-	 * @return string
 	 */
 	function column_is_activated( $item ) {
+		global $wpdb;
+		if ( isset( $item['id'] ) ) {
+			$id = $item['id'];
+		}
+		$is_activated  = '';
+		$active_status = 0;
+		if ( $item && isset( $item['is_activated'] ) ) {
+			$active_status = stripslashes( $item['is_activated'] );
+			$is_activated  = $active_status ? 'on' : 'off';
 
-		return sprintf( '%s', esc_html( $item['is_activated'] ? 'YES' : 'NO' ) );
+		}
+		print'<button type="button" id="' . $id . '" class="wcf-ca-switch wcf-toggle-template-status wcar-switch-grid"  wcf-ca-template-switch="' . $is_activated . '"> ' . $is_activated . ' </button>';
+		print'<input type="hidden" name="wcf_activate_email_template" id="wcf_activate_email_template" value="' . $active_status . '" />';
 	}
 
 	/**
@@ -234,6 +243,7 @@ class Cartflows_Ca_Email_Templates_Table extends WP_List_Table {
 	 * Processes bulk actions
 	 */
 	function process_bulk_action() {
+
 		global $wpdb;
 		$table_name = $wpdb->prefix . CARTFLOWS_CA_EMAIL_TEMPLATE_TABLE;
 		$action     = filter_input( INPUT_GET, 'sub_action', FILTER_SANITIZE_STRING );
@@ -251,8 +261,4 @@ class Cartflows_Ca_Email_Templates_Table extends WP_List_Table {
 		}
 
 	}
-
-
 }
-
-

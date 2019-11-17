@@ -8,6 +8,10 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use \Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding;
+
 /**
  * Contains the logic for completing onboarding tasks.
  */
@@ -40,14 +44,24 @@ class OnboardingTasks {
 	 * Constructor
 	 */
 	public function __construct() {
+		// This hook needs to run when options are updated via REST.
+		add_action( 'add_option_woocommerce_task_list_complete', array( $this, 'add_completion_note' ), 10, 2 );
+
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		// Old settings injection.
 		// Run after Onboarding.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
-		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
-		add_action( 'current_screen', array( $this, 'check_active_task_completion' ), 1000 );
+
+		add_action( 'admin_init', array( $this, 'set_active_task' ), 5 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ) );
 	}
 
 	/**
@@ -79,14 +93,15 @@ class OnboardingTasks {
 			)
 		) > 0;
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
+		$settings['onboarding']['isTaxComplete']                  = self::check_task_completion( 'tax' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
+		$settings['onboarding']['taxJarActivated']                = class_exists( 'WC_Taxjar' );
 
 		return $settings;
 	}
 
-
 	/**
-	 * Temporarily store the active task.
+	 * Temporarily store the active task to persist across page loads when neccessary (such as publishing a product). Most tasks do not need to do this.
 	 */
 	public static function set_active_task() {
 		if ( isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) ) { // WPCS: csrf ok.
@@ -105,19 +120,30 @@ class OnboardingTasks {
 	}
 
 	/**
-	 * Check for active task completion and redirect if complete.
+	 * Get the name of the active task.
+	 *
+	 * @return string
 	 */
-	public static function check_active_task_completion() {
-		$active_task = get_transient( self::ACTIVE_TASK_TRANSIENT );
+	public static function get_active_task() {
+		return get_transient( self::ACTIVE_TASK_TRANSIENT );
+	}
+
+	/**
+	 * Check for active task completion, and clears the transient.
+	 */
+	public static function is_active_task_complete() {
+		$active_task = self::get_active_task();
+
 		if ( ! $active_task ) {
-			return;
+			return false;
 		}
 
 		if ( self::check_task_completion( $active_task ) ) {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
-			wp_safe_redirect( wc_admin_url() );
-			exit;
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
@@ -131,27 +157,66 @@ class OnboardingTasks {
 			case 'products':
 				$products = wp_count_posts( 'product' );
 				return (int) $products->publish > 0 || (int) $products->draft > 0;
-
 			case 'homepage':
-				// @todo This should be run client-side in a Gutenberg hook and add a notice
-				// to return to the task list if complete.
 				$homepage_id = get_option( 'woocommerce_onboarding_homepage_post_id', false );
-
 				if ( ! $homepage_id ) {
 					return false;
 				}
-
 				$post      = get_post( $homepage_id );
 				$completed = $post && 'publish' === $post->post_status;
-				if ( $completed ) {
-					update_option( 'show_on_front', 'page' );
-					update_option( 'page_on_front', $homepage_id );
-				}
-
 				return $completed;
+			case 'tax':
+				return 'yes' === get_option( 'wc_connect_taxes_enabled' ) || count( DataStore::get_taxes( array() ) ) > 0;
+		}
+		return false;
+	}
+
+	/**
+	 * Hooks into the product page to add a notice to return to the task list if a product was added.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public static function add_onboarding_product_notice_admin_script( $hook ) {
+		global $post;
+		if (
+			'post.php' !== $hook ||
+			'product' !== $post->post_type ||
+			'products' !== self::get_active_task() ||
+			! self::is_active_task_complete()
+		) {
+			return;
 		}
 
-		return false;
+		wp_enqueue_script( 'onboarding-product-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+	}
+
+	/**
+	 * Hooks into the post page to display a different success notice and sets the active page as the site's home page if visted from onboarding.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public static function add_onboarding_homepage_notice_admin_script( $hook ) {
+		global $post;
+		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.
+			wp_enqueue_script( 'onboarding-homepage-notice', Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+		}
+	}
+
+	/**
+	 * Adds a notice to return to the task list when the save button is clicked on tax settings pages.
+	 */
+	public static function add_onboarding_tax_notice_admin_script() {
+		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+
+		if (
+			'wc-settings' === $page &&
+			'tax' === $tab &&
+			'tax' === self::get_active_task() &&
+			! self::is_active_task_complete()
+		) {
+			wp_enqueue_script( 'onboarding-tax-notice', Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
+		}
 	}
 
 	/**
@@ -167,5 +232,17 @@ class OnboardingTasks {
 		);
 
 		return $tax_supported_countries;
+	}
+
+	/**
+	 * Add the task list completion note after completing all tasks.
+	 *
+	 * @param mixed $old_value Old value.
+	 * @param mixed $new_value New value.
+	 */
+	public static function add_completion_note( $old_value, $new_value ) {
+		if ( $new_value ) {
+			WC_Admin_Notes_Onboarding::add_task_list_complete_note();
+		}
 	}
 }

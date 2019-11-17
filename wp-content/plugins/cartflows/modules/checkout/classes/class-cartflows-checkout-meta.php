@@ -60,9 +60,6 @@ class Cartflows_Checkout_Meta extends Cartflows_Meta {
 	 */
 	function setup_meta_box() {
 
-		// Get all posts.
-		$post_types = get_post_types();
-
 		if ( _is_wcf_checkout_type() ) {
 			add_meta_box(
 				'wcf-checkout-settings',                // Id.

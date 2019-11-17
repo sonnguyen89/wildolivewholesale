@@ -200,7 +200,7 @@ if ( ! class_exists( 'WC_EWAY_API' ) ) {
 				),
 				'Payment'         => array(
 					'TotalAmount'        => $amount,
-					'CurrencyCode'       => get_woocommerce_currency(),
+					'CurrencyCode'       => $pre_wc_30 ? $order->get_order_currency() : $order->get_currency(),
 					'InvoiceDescription' => apply_filters( 'woocommerce_eway_description', '', $order ),
 					'InvoiceNumber'      => ltrim( $order->get_order_number(), _x( '#', 'hash before order number', 'woocommerce' ) ),
 					'InvoiceReference'   => $order_id,

@@ -60,6 +60,10 @@ class Cartflows_Ca_Email_Templates {
 		return self::$instance;
 	}
 
+
+
+
+
 	/**
 	 * Constructor function that initializes required actions and hooks
 	 */
@@ -72,7 +76,10 @@ class Cartflows_Ca_Email_Templates {
 		$this->wpdb                                 = $wpdb;
 
 		add_action( 'admin_enqueue_scripts', __class__ . '::load_email_templates_script', 15 );
+		add_action( 'wp_ajax_activate_email_templates', array( $this, 'update_email_toggle_button' ) );
 	}
+
+
 
 
 	/**
@@ -96,40 +103,73 @@ class Cartflows_Ca_Email_Templates {
 			CARTFLOWS_CA_VER
 		);
 
-		$vars = array(
-			'settings_url' => add_query_arg(
-				array(
-					'page'   => WCF_CA_PAGE_NAME,
-					'action' => WCF_ACTION_SETTINGS,
-				),
-				admin_url( '/admin.php' )
-			),
-		);
-
-		wp_localize_script( 'cartflows-ca-email-tmpl-settings', 'CAEmailTemplate', $vars );
-
 		$current_user = wp_get_current_user();
 		$vars         = array(
-			'email'               => $current_user->user_email,
-			'name'                => $current_user->user_firstname,
-			'surname'             => $current_user->user_lastname,
-			'phone'               => get_user_meta( $current_user->ID, 'billing_phone', true ),
-			'billing_company'     => get_user_meta( $current_user->ID, 'billing_company', true ),
-			'billing_address_1'   => get_user_meta( $current_user->ID, 'billing_address_1', true ),
-			'billing_address_2'   => get_user_meta( $current_user->ID, 'billing_address_2', true ),
-			'billing_state'       => get_user_meta( $current_user->ID, 'billing_state', true ),
-			'billing_postcode'    => get_user_meta( $current_user->ID, 'billing_postcode', true ),
-			'shipping_first_name' => $current_user->user_firstname,
-			'shipping_last_name'  => $current_user->user_lastname,
-			'shipping_company'    => get_user_meta( $current_user->ID, 'shipping_company', true ),
-			'shipping_address_1'  => get_user_meta( $current_user->ID, 'shipping_address_1', true ),
-			'shipping_address_2'  => get_user_meta( $current_user->ID, 'shipping_address_2', true ),
-			'shipping_city'       => get_user_meta( $current_user->ID, 'shipping_city', true ),
-			'shipping_state'      => get_user_meta( $current_user->ID, 'shipping_state', true ),
-			'shipping_postcode'   => get_user_meta( $current_user->ID, 'shipping_postcode', true ),
-			'woo_currency_symbol' => get_woocommerce_currency_symbol(),
+			'email'                           => $current_user->user_email,
+			'name'                            => $current_user->user_firstname,
+			'surname'                         => $current_user->user_lastname,
+			'phone'                           => get_user_meta( $current_user->ID, 'billing_phone', true ),
+			'billing_company'                 => get_user_meta( $current_user->ID, 'billing_company', true ),
+			'billing_address_1'               => get_user_meta( $current_user->ID, 'billing_address_1', true ),
+			'billing_address_2'               => get_user_meta( $current_user->ID, 'billing_address_2', true ),
+			'billing_state'                   => get_user_meta( $current_user->ID, 'billing_state', true ),
+			'billing_postcode'                => get_user_meta( $current_user->ID, 'billing_postcode', true ),
+			'shipping_first_name'             => $current_user->user_firstname,
+			'shipping_last_name'              => $current_user->user_lastname,
+			'shipping_company'                => get_user_meta( $current_user->ID, 'shipping_company', true ),
+			'shipping_address_1'              => get_user_meta( $current_user->ID, 'shipping_address_1', true ),
+			'shipping_address_2'              => get_user_meta( $current_user->ID, 'shipping_address_2', true ),
+			'shipping_city'                   => get_user_meta( $current_user->ID, 'shipping_city', true ),
+			'shipping_state'                  => get_user_meta( $current_user->ID, 'shipping_state', true ),
+			'shipping_postcode'               => get_user_meta( $current_user->ID, 'shipping_postcode', true ),
+			'woo_currency_symbol'             => get_woocommerce_currency_symbol(),
+			'email_toggle_button_nonce'       => wp_create_nonce( 'activate_email_templates' ),
+			'admin_firstname'                 => __( 'Admin Firstname', 'woo-cart-abandonment-recovery' ),
+			'admin_company'                   => __( 'Admin Company', 'woo-cart-abandonment-recovery' ),
+			'abandoned_product_details_table' => __( 'Abandoned Product Details Table', 'woo-cart-abandonment-recovery' ),
+			'abandoned_product_names'         => __( 'Abandoned Product Names', 'woo-cart-abandonment-recovery' ),
+			'cart_checkout_url'               => __( 'Cart Checkout URL', 'woo-cart-abandonment-recovery' ),
+			'coupon_code'                     => __( 'Coupon Code', 'woo-cart-abandonment-recovery' ),
+			'customer_firstname'              => __( 'Customer First Name', 'woo-cart-abandonment-recovery' ),
+			'customer_lastname'               => __( 'Customer Last Name', 'woo-cart-abandonment-recovery' ),
+			'customer_full_name'              => __( 'Customer Full Name', 'woo-cart-abandonment-recovery' ),
+			'cart_abandonment_date'           => __( 'Cart Abandonment Date', 'woo-cart-abandonment-recovery' ),
+			'site_url'                        => __( 'Site URL', 'woo-cart-abandonment-recovery' ),
+			'unsubscribe_link'                => __( 'Unsubscribe Link', 'woo-cart-abandonment-recovery' ),
 		);
-		wp_localize_script( 'cartflows-ca-email-tmpl-settings', 'CartFlowsCADetails', $vars );
+		wp_localize_script( 'cartflows-ca-email-tmpl-settings', 'wcf_ca_details', $vars );
+
+	}
+
+
+	/**
+	 * Update the activate email template toggle button.
+	 */
+	public function update_email_toggle_button() {
+
+		check_ajax_referer( 'activate_email_templates', 'security' );
+		global $wpdb;
+		$cart_abandonment_template_table_name = $wpdb->prefix . CARTFLOWS_CA_EMAIL_TEMPLATE_TABLE;
+
+		$id = filter_input( INPUT_POST, 'id', FILTER_VALIDATE_INT );
+
+		$is_activated = filter_input( INPUT_POST, 'state', FILTER_SANITIZE_STRING );
+
+		$response = __( 'Something went wrong', 'woo-cart-abandonment-recovery' );
+		if ( ! isset( $is_activated ) || ! isset( $id ) ) {
+			wp_send_json_error( $response );
+		}
+
+		if ( $is_activated && 'on' === $is_activated ) {
+			$is_activated = 1;
+			$response     = __( 'Activated', 'woo-cart-abandonment-recovery' );
+		} else {
+			$is_activated = 0;
+			$response     = __( 'Deactivated', 'woo-cart-abandonment-recovery' );
+		}
+
+		$wpdb->query( $wpdb->prepare( "UPDATE {$cart_abandonment_template_table_name} SET is_activated = %d WHERE id = %d ", $is_activated, $id ), ARRAY_A ); // phpcs:ignore
+		wp_send_json_success( $response );
 
 	}
 
@@ -140,6 +180,7 @@ class Cartflows_Ca_Email_Templates {
 		define( 'WCF_CA_PAGE_NAME', 'woo-cart-abandonment-recovery' );
 
 		define( 'WCF_CA_GENERAL_SETTINGS_SECTION', 'cartflows_cart_abandonment_settings_section' );
+		define( 'WCF_CA_COUPONS_SETTINGS_SECTION', 'cartflows_cart_abandonment_coupons_settings_section' );
 		define( 'WCF_CA_EMAIL_SETTINGS_SECTION', 'cartflows_email_template_settings_section' );
 		define( 'WCF_CA_COUPON_CODE_SECTION', 'cartflows_coupon_code_settings_section' );
 		define( 'WCF_CA_ZAPIER_SETTINGS_SECTION', 'cartflows_zapier_settings_section' );
@@ -558,8 +599,8 @@ class Cartflows_Ca_Email_Templates {
 										}
 										print'<input type="number" class="wcf-ca-trigger-input wcf-ca-coupon-inputs" id="wcf_email_coupon_expiry_date" name="wcf_email_coupon_expiry_date" value="' . intval( $wcf_email_coupon_expiry_date ) . '" autocomplete="off" />';
 										$items = array(
-											'hours' => 'Hour(s)',
-											'days'  => 'Day(s)',
+											'hours' => __( 'Hour(s)', 'woo-cart-abandonment-recovery' ),
+											'days'  => __( 'Day(s)', 'woo-cart-abandonment-recovery' ),
 										);
 										echo "<select id='wcf_coupon_expiry_unit' name='wcf_coupon_expiry_unit'>";
 										foreach ( $items as $key => $item ) {
@@ -653,9 +694,9 @@ class Cartflows_Ca_Email_Templates {
 												$frequency_unit = $results->frequency_unit;
 											}
 											$days_or_hours = array(
-												'MINUTE' => 'Minute(s)',
-												'HOUR'   => 'Hour(s)',
-												'DAY'    => 'Day(s)',
+												'MINUTE' => __( 'Minute(s)', 'woo-cart-abandonment-recovery' ),
+												'HOUR'   => __( 'Hour(s)', 'woo-cart-abandonment-recovery' ),
+												'DAY'    => __( 'Day(s)', 'woo-cart-abandonment-recovery' ),
 											);
 											foreach ( $days_or_hours as $k => $v ) {
 												printf(
@@ -682,7 +723,7 @@ class Cartflows_Ca_Email_Templates {
 									</th>
 									<td>
 										<input class="wcf-ca-trigger-input" type="text" id="wcf_send_test_email" name="send_test_email" value="<?php echo $current_user->user_email; ?>" class="wcf-ca-trigger-input">
-										<input class="button" type="button" value="Send a test email" id="wcf_preview_email"/> <br/>
+										<input class="button" type="button" value=" <?php _e( 'Send a test email', 'woo-cart-abandonment-recovery' ); ?>" id="wcf_preview_email"/> <br/>
 
 										<label id="mail_response_msg"> </label>
 									</td>
@@ -695,9 +736,9 @@ class Cartflows_Ca_Email_Templates {
 				<?php wp_nonce_field( WCF_EMAIL_TEMPLATES_NONCE, '_wpnonce' ); ?>
 				<p class="submit">
 					<?php
-					$button_value = 'Save Changes';
+					$button_value = __( 'Save Changes', 'woo-cart-abandonment-recovery' );
 					if ( WCF_SUB_ACTION_EDIT_EMAIL_TEMPLATES === $sub_action ) {
-						$button_value = 'Update Changes';
+						$button_value = __( 'Update Changes', 'woo-cart-abandonment-recovery' );
 					}
 					?>
 					<input type="submit" name="Submit" class="button-primary" value="<?php echo $button_value; ?>"/>

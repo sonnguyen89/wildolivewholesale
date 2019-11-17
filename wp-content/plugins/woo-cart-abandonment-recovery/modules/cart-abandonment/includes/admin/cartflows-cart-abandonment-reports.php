@@ -11,19 +11,19 @@
 
 	<div class="wcf-ca-left-report-field-group">
 		<button onclick="window.location.search += '&filter=today';"
-				class="button <?php echo 'today' === $filter ? 'button-primary' : 'button-secondary'; ?>"> Today
+				class="button <?php echo 'today' === $filter ? 'button-primary' : 'button-secondary'; ?>"> <?php _e( 'Today', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 
 		<button onclick="window.location.search += '&filter=yesterday';"
-				class="button <?php echo 'yesterday' === $filter ? 'button-primary' : 'button-secondary'; ?>"> Yesterday
+				class="button <?php echo 'yesterday' === $filter ? 'button-primary' : 'button-secondary'; ?>"> <?php _e( 'Yesterday', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 
 		<button onclick="window.location.search += '&filter=last_week';"
-				class="button <?php echo 'last_week' === $filter ? 'button-primary' : 'button-secondary'; ?>"> Last Week
+				class="button <?php echo 'last_week' === $filter ? 'button-primary' : 'button-secondary'; ?>"> <?php _e( 'Last Week', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 
 		<button onclick="window.location.search += '&filter=last_month';"
-				class="button <?php echo 'last_month' === $filter ? 'button-primary' : 'button-secondary'; ?> "> Last Month
+				class="button <?php echo 'last_month' === $filter ? 'button-primary' : 'button-secondary'; ?> "> <?php _e( 'Last Month', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 	</div>
 
@@ -32,7 +32,7 @@
 		<input class="wcf-ca-filter-input" type="text" id="wcf_ca_custom_filter_from" placeholder="YYYY-MM-DD" value="<?php echo $from_date; ?>"/>
 		<input class="wcf-ca-filter-input" type="text" id="wcf_ca_custom_filter_to" placeholder="YYYY-MM-DD" value="<?php echo $to_date; ?>" />
 		<button id="wcf_ca_custom_filter"
-				class="button <?php echo 'custom' === $filter ? 'button-primary' : 'button-secondary'; ?> "> Custom Filter
+				class="button <?php echo 'custom' === $filter ? 'button-primary' : 'button-secondary'; ?> "> <?php _e( 'Custom Filter', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 
 	</div>
@@ -105,13 +105,13 @@
 <div class="wcf-ca-report-btn">
 	<div class="wcf-ca-left-report-field-group">
 		<button onclick="window.location.search += '&filter_table=<?php echo WCF_CART_ABANDONED_ORDER; ?>';"
-				class="button <?php echo WCF_CART_ABANDONED_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?> "> Recoverable Orders
+				class="button <?php echo WCF_CART_ABANDONED_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?> "> <?php _e( 'Recoverable Orders', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 		<button onclick="window.location.search += '&filter_table=<?php echo WCF_CART_COMPLETED_ORDER; ?>';"
-				class="button <?php echo WCF_CART_COMPLETED_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?>"> Recovered Orders
+				class="button <?php echo WCF_CART_COMPLETED_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?>"><?php _e( 'Recovered Orders', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 		<button onclick="window.location.search += '&filter_table=<?php echo WCF_CART_LOST_ORDER; ?>';"
-				class="button <?php echo WCF_CART_LOST_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?>"> Lost Orders
+				class="button <?php echo WCF_CART_LOST_ORDER === $filter_table ? 'button-primary' : 'button-secondary'; ?>"><?php _e( 'Lost Orders', 'woo-cart-abandonment-recovery' ); ?>
 		</button>
 	</div>
 </div>

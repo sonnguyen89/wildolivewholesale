@@ -11,6 +11,8 @@ $debug_data = Cartflows_Helper::get_debug_settings();
 
 $permalink_settings = Cartflows_Helper::get_permalink_settings();
 
+$facebook_settings = Cartflows_Helper::get_facebook_settings();
+
 $debug_on = ( isset( $_GET['debug'] ) ) ? sanitize_text_field( $_GET['debug'] ) : 'false';
 
 $error_log = filter_input( INPUT_GET, 'cartflows-error-log', FILTER_VALIDATE_BOOLEAN );
@@ -185,6 +187,92 @@ $error_log = filter_input( INPUT_GET, 'cartflows-error-log', FILTER_VALIDATE_BOO
 
 						</form>
 					</div>
+				</div>
+
+
+				<div class="general-settingss-form postbox">
+					<h2 class="wcf-facebook-hndle wcf-normal-cusror ui-sortable-handle hndle">
+
+						<span><?php _e( 'Facebook Pixel Settings', 'cartflows' ); ?></span>
+					</h2>
+
+					<form method="post" class="wrap wcf-clear" action="">
+						<div class="form-wrap">
+							<input type="hidden" name="action" value="wcf_save_facebook_pixel_settings">
+								<div id="post-body">
+
+										<div class="inside">
+												<div class="form-wrap">
+													<?php
+													echo Cartflows_Admin_Fields::checkobox_field(
+														array(
+															'id'    => 'wcf_facebook_pixel_tracking',
+															'name'  => '_cartflows_facebook[facebook_pixel_tracking]',
+															'title' => __( 'Enable Facebook Pixel Tracking', 'cartflows' ),
+															'value' => $facebook_settings['facebook_pixel_tracking'],
+														)
+													);
+
+													echo "<div class='wcf-fb-pixel-wrapper'>";
+
+													echo Cartflows_Admin_Fields::text_field(
+														array(
+															'id'    => 'wcf_facebook_pixel_id',
+															'name'  => '_cartflows_facebook[facebook_pixel_id]',
+															'title' => __( 'Enter Facebook pixel ID', 'cartflows' ),
+															'value' => $facebook_settings['facebook_pixel_id'],
+														)
+													);
+
+
+													echo Cartflows_Admin_Fields::title_field(
+														array(
+															'title' => __( 'Enable Events:', 'cartflows' ),
+														)
+													);
+
+
+													echo Cartflows_Admin_Fields::checkobox_field(
+														array(
+															'id'    => 'wcf_facebook_pixel_initiate_checkout',
+															'name'  => '_cartflows_facebook[facebook_pixel_initiate_checkout]',
+															'title' => __( 'Initiate Checkout', 'cartflows' ),
+															'value' => $facebook_settings['facebook_pixel_initiate_checkout'],
+														)
+													);
+
+													echo Cartflows_Admin_Fields::checkobox_field(
+														array(
+															'id'    => 'wcf_facebook_pixel_add_payment_info',
+															'name'  => '_cartflows_facebook[facebook_pixel_add_payment_info]',
+															'title' => __( 'Add Payment Info', 'cartflows' ),
+															'value' => $facebook_settings['facebook_pixel_add_payment_info'],
+														)
+													);
+
+													echo Cartflows_Admin_Fields::checkobox_field(
+														array(
+															'id'    => 'wcf_facebook_pixel_purchase_complete',
+															'name'  => '_cartflows_facebook[facebook_pixel_purchase_complete]',
+															'title' => __( 'Purchase Complete', 'cartflows' ),
+															'value' => $facebook_settings['facebook_pixel_purchase_complete'],
+														)
+													);
+
+													echo '</div>';
+
+													?>
+												</div>
+
+												<?php submit_button( __( 'Save Changes', 'cartflows' ), 'cartflows-facebook-setting-save-btn button-primary button', 'submit', false ); ?>
+												<?php wp_nonce_field( 'cartflows-facebook-settings', 'cartflows-facebook-settings-nonce' ); ?>
+											</div>
+
+								</div>
+						</div>
+					</form>
+
+
 				</div>
 			</div>
 			<div class="postbox-container" id="postbox-container-1">

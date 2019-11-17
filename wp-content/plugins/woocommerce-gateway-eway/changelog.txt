@@ -1,5 +1,10 @@
 *** WooCommerce eWAY Gateway Changelog ***
 
+2019-10-29 - version 3.1.23
+* Fix    - Use order currency instead of store currency.
+* Tweak  - WC 3.8 compatibility.
+* Tweak  - WP 5.3 compatibility.
+
 2019-08-09 - version 3.1.22
 * Tweak  - WC 3.7 compatibility.
 

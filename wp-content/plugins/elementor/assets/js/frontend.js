@@ -1,4 +1,4 @@
-/*! elementor - v2.7.4 - 06-10-2019 */
+/*! elementor - v2.7.5 - 28-10-2019 */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -4343,6 +4343,8 @@ _Object$defineProperty(exports, "__esModule", {
 
 exports.default = void 0;
 
+__webpack_require__(26);
+
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(4));
 
 var _createClass2 = _interopRequireDefault(__webpack_require__(5));
@@ -4382,10 +4384,21 @@ function (_elementorModules$fro) {
       };
     }
   }, {
+    key: "getDefaultElements",
+    value: function getDefaultElements() {
+      var classes = this.getSettings('classes');
+      var elements = {
+        $slider: this.$element.find('.' + classes.swiperContainer)
+      };
+      elements.$mainSwiperSlides = elements.$slider.find('.' + classes.swiperSlide);
+      return elements;
+    }
+  }, {
     key: "getSwiperOptions",
     value: function getSwiperOptions() {
-      var elementSettings = this.getElementSettings(),
-          kenBurnsActiveClass = this.getSettings('classes.kenBurnsActive');
+      var _this = this;
+
+      var elementSettings = this.getElementSettings();
       var swiperOptions = {
         grabCursor: false,
         slidesPerView: 1,
@@ -4398,12 +4411,7 @@ function (_elementorModules$fro) {
         },
         on: {
           slideChange: function slideChange() {
-            if (this.$activeImage) {
-              this.$activeImage.removeClass(kenBurnsActiveClass);
-            }
-
-            this.$activeImage = jQuery(this.slides[this.activeIndex]).children();
-            this.$activeImage.addClass(kenBurnsActiveClass);
+            _this.handleKenBurns();
           }
         }
       };
@@ -4431,6 +4439,31 @@ function (_elementorModules$fro) {
       return swiperOptions;
     }
   }, {
+    key: "getInitialSlide",
+    value: function getInitialSlide() {
+      var editSettings = this.getEditSettings();
+      return editSettings.activeItemIndex ? editSettings.activeItemIndex - 1 : 0;
+    }
+  }, {
+    key: "handleKenBurns",
+    value: function handleKenBurns() {
+      var settings = this.getSettings();
+
+      if (this.$activeImageBg) {
+        this.$activeImageBg.removeClass(settings.classes.kenBurnsActive);
+      }
+
+      this.activeItemIndex = this.swiper ? this.swiper.activeIndex : this.getInitialSlide();
+
+      if (this.swiper) {
+        this.$activeImageBg = jQuery(this.swiper.slides[this.activeItemIndex]).children('.' + settings.classes.swiperSlideInner);
+      } else {
+        this.$activeImageBg = jQuery(this.elements.$mainSwiperSlides[0]).children('.' + settings.classes.swiperSlideInner);
+      }
+
+      this.$activeImageBg.addClass(settings.classes.kenBurnsActive);
+    }
+  }, {
     key: "getSlidesCount",
     value: function getSlidesCount() {
       return this.elements.$slides.length;
@@ -4438,7 +4471,7 @@ function (_elementorModules$fro) {
   }, {
     key: "buildSwiperElements",
     value: function buildSwiperElements() {
-      var _this = this;
+      var _this2 = this;
 
       var classes = this.getSettings('classes'),
           elementSettings = this.getElementSettings(),
@@ -4470,7 +4503,7 @@ function (_elementorModules$fro) {
         });
         $slide.append($slidebg);
         $wrapper.append($slide);
-        _this.elements.$slides = _this.elements.$slides.add($slide);
+        _this2.elements.$slides = _this2.elements.$slides.add($slide);
       });
       $container.append($wrapper);
       this.$element.prepend($container);
@@ -4484,6 +4517,7 @@ function (_elementorModules$fro) {
       }
 
       this.swiper = new Swiper(this.elements.$backgroundSlideShowContainer, this.getSwiperOptions());
+      this.handleKenBurns();
     }
   }, {
     key: "activate",

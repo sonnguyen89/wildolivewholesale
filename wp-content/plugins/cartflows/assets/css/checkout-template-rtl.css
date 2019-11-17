@@ -128,8 +128,8 @@
    font-size: 15px;
 }
 
-.mt20{
-    margin-top: 20px !important;
+.wcf-embed-checkout-form .woocommerce form .form-row.mt20{
+    margin-top: 20px ;
 }
 
 .wcf-embed-checkout-form .woocommerce form .form-row.woocommerce-invalid .select2-container, 
@@ -788,6 +788,7 @@
 
 .wcf-embed-checkout-form .woocommerce a{
     color: #F16334;
+    background-color: transparent;
     text-decoration: none;
 }
 

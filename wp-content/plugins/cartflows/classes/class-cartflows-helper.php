@@ -54,6 +54,14 @@ class Cartflows_Helper {
 	private static $checkout_fields = null;
 
 	/**
+	 * Facebook pixel global data
+	 *
+	 * @var faceboook
+	 */
+	private static $facebook = null;
+
+
+	/**
 	 * Returns an option from the database for
 	 * the admin settings page.
 	 *
@@ -559,4 +567,128 @@ class Cartflows_Helper {
 
 		return $atts_string;
 	}
+
+	/**
+	 * Get facebook pixel settings.
+	 *
+	 * @return  facebook array.
+	 */
+	public static function get_facebook_settings() {
+
+		if ( null === self::$facebook ) {
+
+			$facebook_default = array(
+				'facebook_pixel_id'                => '',
+				'facebook_pixel_add_to_cart'       => 'enable',
+				'facebook_pixel_initiate_checkout' => 'enable',
+				'facebook_pixel_add_payment_info'  => 'enable',
+				'facebook_pixel_purchase_complete' => 'enable',
+				'facebook_pixel_tracking'          => 'disable',
+			);
+
+			$facebook = self::get_admin_settings_option( '_cartflows_facebook', false, false );
+
+			$facebook = wp_parse_args( $facebook, $facebook_default );
+
+			self::$facebook = apply_filters( 'cartflows_facebook_settings_default', $facebook );
+
+		}
+
+		return self::$facebook;
+	}
+
+
+	/**
+	 * Prepare response data for facebook.
+	 *
+	 * @param int   $order_id order_id.
+	 * @param array $offer_data offer data.
+	 */
+	public static function send_fb_response_if_enabled( $order_id, $offer_data = array() ) {
+
+		$fb_settings = self::get_facebook_settings();
+		if ( 'enable' === $fb_settings['facebook_pixel_tracking'] ) {
+			setcookie( 'wcf_order_details', json_encode( self::prepare_purchase_data_fb_response( $order_id, $offer_data ) ), strtotime( '+1 year' ), '/' );
+		}
+
+	}
+
+	/**
+	 * Prepare purchase response for facebook purcase event.
+	 *
+	 * @param integer $order_id order id.
+	 * @param array   $offer_data offer data.
+	 * @return mixed
+	 */
+	public static function prepare_purchase_data_fb_response( $order_id, $offer_data = array() ) {
+
+		$thankyou['order_id']     = $order_id;
+		$thankyou['content_type'] = 'product';
+		$thankyou['currency']     = wcf()->options->get_checkout_meta_value( $order_id, '_order_currency' );
+		$thankyou['userAgent']    = wcf()->options->get_checkout_meta_value( $order_id, '_customer_user_agent' );
+		$thankyou['plugin']       = 'CartFlows';
+		$order                    = wc_get_order( $order_id );
+		if ( empty( $offer_data ) ) {
+			// Iterating through each WC_Order_Item_Product objects.
+			foreach ( $order->get_items() as $item_key => $item ) {
+				$product                   = $item->get_product(); // Get the WC_Product object.
+				$thankyou['content_ids'][] = (string) $product->get_id();
+			}
+			$thankyou['value'] = wcf()->options->get_checkout_meta_value( $order_id, '_order_total' );
+		} else {
+			$thankyou['content_ids'][] = (string) $offer_data['id'];
+			$thankyou['value']         = $offer_data['total'];
+		}
+
+		return $thankyou;
+	}
+
+	/**
+	 * Prepare cart data for fb response.
+	 *
+	 * @return array
+	 */
+	public static function prepare_cart_data_fb_response() {
+		$params           = array();
+		$cart_total       = WC()->cart->get_cart_contents_total();
+		$cart_items_count = WC()->cart->get_cart_contents_count();
+		$items            = WC()->cart->get_cart();
+		$product_names    = '';
+		$category_names   = '';
+		$cart_contents    = array();
+		foreach ( $items as $item => $value ) {
+
+			$_product                = wc_get_product( $value['product_id'] );
+			$params['content_ids'][] = (string) $_product->get_id();
+			$product_names           = $product_names . ', ' . $_product->get_title();
+			$category_names          = $category_names . ', ' . strip_tags( wc_get_product_category_list( $_product->get_id() ) );
+			array_push(
+				$cart_contents,
+				array(
+					'id'         => $_product->get_id(),
+					'name'       => $_product->get_title(),
+					'quantity'   => $value['quantity'],
+					'item_price' => $_product->get_price(),
+				)
+			);
+		}
+
+		$user                         = wp_get_current_user();
+		$roles                        = implode( ', ', $user->roles );
+		$params['content_name']       = substr( $product_names, 2 );
+		$params['categoey_name']      = substr( $category_names, 2 );
+		$params['user_roles']         = $roles;
+		$params['plugin']             = 'CartFlows';
+		$params['contents']           = json_encode( $cart_contents );
+		$params['content_type']       = 'product';
+		$params['value']              = $cart_total;
+		$params['num_items']          = $cart_items_count;
+		$params['currency']           = get_woocommerce_currency();
+		$params['language']           = get_bloginfo( 'language' );
+		$params['userAgent']          = $_SERVER['HTTP_USER_AGENT'];
+		$params['product_catalog_id'] = '';
+		$params['domain']             = get_site_url();
+		return $params;
+	}
+
 }

@@ -1,20 +1,78 @@
 [
     {
+        "name": "tubalmartin/cssmin",
+        "version": "v4.1.1",
+        "version_normalized": "4.1.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/tubalmartin/YUI-CSS-compressor-PHP-port.git",
+            "reference": "3cbf557f4079d83a06f9c3ff9b957c022d7805cf"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/tubalmartin/YUI-CSS-compressor-PHP-port/zipball/3cbf557f4079d83a06f9c3ff9b957c022d7805cf",
+            "reference": "3cbf557f4079d83a06f9c3ff9b957c022d7805cf",
+            "shasum": ""
+        },
+        "require": {
+            "ext-pcre": "*",
+            "php": ">=5.3.2"
+        },
+        "require-dev": {
+            "cogpowered/finediff": "0.3.*",
+            "phpunit/phpunit": "4.8.*"
+        },
+        "time": "2018-01-15 15:26:51",
+        "bin": [
+            "cssmin"
+        ],
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "tubalmartin\\CssMin\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD-3-Clause"
+        ],
+        "authors": [
+            {
+                "name": "Túbal Martín",
+                "homepage": "http://tubalmartin.me/"
+            }
+        ],
+        "description": "A PHP port of the YUI CSS compressor",
+        "homepage": "https://github.com/tubalmartin/YUI-CSS-compressor-PHP-port",
+        "keywords": [
+            "compress",
+            "compressor",
+            "css",
+            "cssmin",
+            "minify",
+            "yui"
+        ]
+    },
+    {
         "name": "codeinwp/gutenberg-blocks",
         "version": "dev-master",
         "version_normalized": "9999999-dev",
         "source": {
             "type": "git",
             "url": "https://github.com/Codeinwp/gutenberg-blocks.git",
-            "reference": "a48eea1d37d39c581e9df95867f2fe74d1de0054"
+            "reference": "ddbeac50b75a7925c3a5894152f94dddb34d6f68"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Codeinwp/gutenberg-blocks/zipball/a48eea1d37d39c581e9df95867f2fe74d1de0054",
-            "reference": "a48eea1d37d39c581e9df95867f2fe74d1de0054",
+            "url": "https://api.github.com/repos/Codeinwp/gutenberg-blocks/zipball/ddbeac50b75a7925c3a5894152f94dddb34d6f68",
+            "reference": "ddbeac50b75a7925c3a5894152f94dddb34d6f68",
             "shasum": ""
         },
-        "time": "2019-07-30 20:39:39",
+        "require": {
+            "tubalmartin/cssmin": "^4.1"
+        },
+        "time": "2019-11-05 00:39:52",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -43,15 +101,15 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Codeinwp/gutenberg-css.git",
-            "reference": "d2afda7117b482afda080ded8a01ace86efe60ae"
+            "reference": "e94a4446c32fa1baf09b26330195ec5bfeedd883"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Codeinwp/gutenberg-css/zipball/d2afda7117b482afda080ded8a01ace86efe60ae",
-            "reference": "d2afda7117b482afda080ded8a01ace86efe60ae",
+            "url": "https://api.github.com/repos/Codeinwp/gutenberg-css/zipball/e94a4446c32fa1baf09b26330195ec5bfeedd883",
+            "reference": "e94a4446c32fa1baf09b26330195ec5bfeedd883",
             "shasum": ""
         },
-        "time": "2019-04-02 22:46:57",
+        "time": "2019-11-01 18:52:51",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -80,15 +138,15 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Codeinwp/gutenberg-animation.git",
-            "reference": "2d7789ceac8e6b81048d1ab801d2bc644e3b6fe6"
+            "reference": "68e592b32b63b7c61eeb990431ad18c6b8450b65"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Codeinwp/gutenberg-animation/zipball/2d7789ceac8e6b81048d1ab801d2bc644e3b6fe6",
-            "reference": "2d7789ceac8e6b81048d1ab801d2bc644e3b6fe6",
+            "url": "https://api.github.com/repos/Codeinwp/gutenberg-animation/zipball/68e592b32b63b7c61eeb990431ad18c6b8450b65",
+            "reference": "68e592b32b63b7c61eeb990431ad18c6b8450b65",
             "shasum": ""
         },
-        "time": "2019-09-10 12:22:28",
+        "time": "2019-11-01 18:52:50",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -117,12 +175,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Codeinwp/themeisle-sdk.git",
-            "reference": "ede4dbdb119ad5b5d317f3866d68c90a45fe8179"
+            "reference": "6d2661b91b8ebaed6dea99a29832f33225796c5a"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Codeinwp/themeisle-sdk/zipball/ede4dbdb119ad5b5d317f3866d68c90a45fe8179",
-            "reference": "ede4dbdb119ad5b5d317f3866d68c90a45fe8179",
+            "url": "https://api.github.com/repos/Codeinwp/themeisle-sdk/zipball/6d2661b91b8ebaed6dea99a29832f33225796c5a",
+            "reference": "6d2661b91b8ebaed6dea99a29832f33225796c5a",
             "shasum": ""
         },
         "require-dev": {
@@ -130,7 +188,7 @@
             "squizlabs/php_codesniffer": "^3.1",
             "wp-coding-standards/wpcs": "^1.0.0"
         },
-        "time": "2019-08-23 08:47:43",
+        "time": "2019-09-24 12:35:52",
         "type": "library",
         "installation-source": "source",
         "notification-url": "https://packagist.org/downloads/",

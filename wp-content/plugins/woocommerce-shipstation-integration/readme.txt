@@ -4,7 +4,7 @@ Tags: shipping, woocommerce, automattic
 Requires at least: 4.4
 Tested up to: 5.1
 Requires PHP: 5.6
-Stable tag: 4.1.29
+Stable tag: 4.1.30
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -45,6 +45,9 @@ For help setting up and configuring, please refer to our [user guide](https://do
 If you get stuck, you can ask for help in the Plugin Forum.
 
 == Changelog ==
+
+= 2019-11-04 - version 4.1.30 =
+* Tweak - WC 3.8 compatibility.
 
 = 2019-08-12 - version 4.1.29 =
 * Tweak - WC 3.7 compatibility.

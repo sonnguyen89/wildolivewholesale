@@ -35,7 +35,7 @@ class Cartflows_Landing_Markup {
 	 */
 	public function __construct() {
 
-		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_action( 'pre_get_posts', array( $this, 'wcf_pre_get_posts' ) );
 		add_action( 'template_redirect', array( $this, 'template_redirect' ) );
 
 		if ( is_admin() ) {
@@ -99,7 +99,7 @@ class Cartflows_Landing_Markup {
 	 *
 	 * @param string $query post query.
 	 */
-	function pre_get_posts( $query ) {
+	function wcf_pre_get_posts( $query ) {
 
 		if ( $query->is_main_query() && ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
 
