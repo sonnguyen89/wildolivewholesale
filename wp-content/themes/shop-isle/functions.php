@@ -42,6 +42,7 @@ require get_template_directory() . '/inc/init.php';
  * before go to shopping
  *
  */
+add_action('template_redirect', 'woo_login_redirect');
 function woo_login_redirect() {
 
     if (!is_user_logged_in() && (is_home() || is_woocommerce() || is_cart() || is_checkout()))
@@ -50,7 +51,27 @@ function woo_login_redirect() {
         exit;
     }
 }
-add_action('template_redirect', 'woo_login_redirect');
+
+/**
+ * redirect customer to front page after login
+ */
+add_filter( 'woocommerce_login_redirect', 'redirect_customer', 10, 2 );
+function redirect_customer( $redirect_to, $user ){
+
+    //is there a user to check?
+
+    if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+
+        //check for customer
+        if ( in_array( 'customer', $user->roles ) ) {
+
+            $redirect_to = get_home_url(); // front page url
+        }
+    }
+
+    return $redirect_to;
+}
+
 
 /**
  * CUSTOMISE THE THEME
