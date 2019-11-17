@@ -60,7 +60,18 @@ if ( ! function_exists( 'shop_isle_primary_navigation' ) ) {
                     </div>
 
                     <div class="header-menu-wrap">
-                        <div class="collapse navbar-collapse left-menu-bar" id="custom-collapse">
+                        <div class="collapse navbar-collapse mobile-menu-bar" id="custom-collapse">
+                            <?php
+                            wp_nav_menu(
+                                array(
+                                    'theme_location' => 'mobile-primary-menu',
+                                    'container'      => false,
+                                    'menu_class'     => 'nav navbar-nav navbar-left',
+                                )
+                            );
+                            ?>
+                        </div>
+                        <div class="collapse navbar-collapse left-menu-bar" id="left-custom-collapse">
                             <?php
                             wp_nav_menu(
                                 array(
