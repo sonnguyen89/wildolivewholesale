@@ -18,7 +18,7 @@ CUSTOMIZE THE THEME
     padding: 20px 0;
 }
 .header-menu-wrap .left-menu-bar {
-    float:left;width: 15%;
+    float:left;width: 20%;
 }
 .header-menu-wrap .right-menu-bar {
     float:right;width: 20%;
@@ -61,7 +61,7 @@ CUSTOMIZE THE THEME
 .shop_isle_header_title {
     text-align: center;
     margin: 0 auto;
-    width: 65%;
+    width: 60%;
 }
 .shop-isle-header-title-inner {
     text-align: center;
