@@ -150,3 +150,24 @@ CUSTOMIZE THE THEME
     cursor: default;
     display: none;
 }
+
+/**********PRODUCT PAGE***********/
+.woocommerce-product-details__short-description ul {
+    margin: 0 0 1.5em 0;
+}
+.woocommerce-product-details__short-description p,
+.woocommerce-product-details__short-description ul li p {
+    margin: 0 0 5px;
+}
+/*hide the product tabs for now */
+.single-product div.product .woocommerce-tabs {
+    display: none;
+}
+
+
+/***********FOOTER *****************/
+.footer .font-alt {
+    font: 400 13px/1.8 "Open Sans",sans-serif;
+    letter-spacing: 1px;
+    text-transform: capitalize;
+}
